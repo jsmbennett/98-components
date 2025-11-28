@@ -16,6 +16,7 @@
     "scripts": {
         "dev": "vite serve --config vite.test.config.js",
         "build": "vite build",
+        "build:test": "vite build --config vite.build-test.config.js",
         "preview": "vite preview"
     },
     "dependencies": {

@@ -1,0 +1,39 @@
+/* 98.css overrides */
+
+select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    border-bottom: 1px solid #fff;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #fff;
+    border-top: 1px solid #808080;
+    box-shadow: inset -1px -1px #dfdfdf, inset 1px 1px #0a0a0a;
+    box-sizing: border-box;
+    color: #000;
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    height: 21px;
+    padding: 3px 20px 3px 4px;
+    border-radius: 0;
+    position: relative;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='16' height='17' viewBox='0 0 16 17' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='15' height='16' fill='%23C0C0C0' stroke='white'/%3E%3Cpath d='M1.5 1.5H14.5V15.5H1.5V1.5Z' fill='%23C0C0C0' stroke='%23DFDFDF'/%3E%3Cpath d='M14.5 15.5H15.5V16.5H14.5V15.5Z' fill='black'/%3E%3Cpath d='M15.5 0.5H14.5V1.5H15.5V0.5Z' fill='black'/%3E%3Cpath d='M1.5 15.5H0.5V16.5H1.5V15.5Z' fill='black'/%3E%3Cpath d='M1.5 15.5H14.5V16.5H1.5V15.5Z' fill='black'/%3E%3Cpath d='M14.5 1.5H15.5V15.5H14.5V1.5Z' fill='black'/%3E%3Cpath d='M13.5 14.5H14.5V15.5H13.5V14.5Z' fill='%23808080'/%3E%3Cpath d='M2.5 14.5H13.5V15.5H2.5V14.5Z' fill='%23808080'/%3E%3Cpath d='M13.5 2.5H14.5V14.5H13.5V2.5Z' fill='%23808080'/%3E%3Cpath d='M4 7H12L8 11L4 7Z' fill='black'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 2px center;
+}
+
+select:focus {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
+}
+
+select:active {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='16' height='17' viewBox='0 0 16 17' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='0.5' y='0.5' width='15' height='16' fill='%23C0C0C0' stroke='white'/%3E%3Cpath d='M1.5 1.5H14.5V15.5H1.5V1.5Z' fill='%23C0C0C0' stroke='%23DFDFDF'/%3E%3Cpath d='M14.5 15.5H15.5V16.5H14.5V15.5Z' fill='black'/%3E%3Cpath d='M15.5 0.5H14.5V1.5H15.5V0.5Z' fill='black'/%3E%3Cpath d='M1.5 15.5H0.5V16.5H1.5V15.5Z' fill='black'/%3E%3Cpath d='M1.5 15.5H14.5V16.5H1.5V15.5Z' fill='black'/%3E%3Cpath d='M14.5 1.5H15.5V15.5H14.5V1.5Z' fill='black'/%3E%3Cpath d='M13.5 14.5H14.5V15.5H13.5V14.5Z' fill='%23808080'/%3E%3Cpath d='M2.5 14.5H13.5V15.5H2.5V14.5Z' fill='%23808080'/%3E%3Cpath d='M13.5 2.5H14.5V14.5H13.5V2.5Z' fill='%23808080'/%3E%3Cpath d='M5 8H13L9 12L5 8Z' fill='black'/%3E%3C/svg%3E");
+}
+
+option {
+    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    background-color: #fff;
+    color: #000;
+}

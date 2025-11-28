@@ -1,20 +1,20 @@
 {
-    "name": "98ia-client",
+    "name": "98-components",
     "version": "0.0.1",
     "type": "module",
     "files": [
         "dist"
     ],
-    "main": "./dist/98ia-client.umd.cjs",
-    "module": "./dist/98ia-client.js",
+    "main": "./dist/98-components-client.umd.cjs",
+    "module": "./dist/98-components-client.js",
     "exports": {
         ".": {
-            "import": "./dist/98ia-client.js",
-            "require": "./dist/98ia-client.umd.cjs"
+            "import": "./dist/98-components-client.js",
+            "require": "./dist/98-components-client.umd.cjs"
         }
     },
     "scripts": {
-        "dev": "vite",
+        "dev": "vite serve --config vite.test.config.js",
         "build": "vite build",
         "preview": "vite preview"
     },

@@ -5,8 +5,8 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve(__dirname, 'src/index.js'),
-            name: '98-components-client',
-            fileName: '98-components-client',
+            name: '98-components',
+            fileName: '98-components',
         },
         rollupOptions: {
             external: [/^98\.css/],

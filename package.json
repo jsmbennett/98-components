@@ -5,12 +5,12 @@
     "files": [
         "dist"
     ],
-    "main": "./dist/98-components-client.umd.cjs",
-    "module": "./dist/98-components-client.js",
+    "main": "./dist/98-components.umd.cjs",
+    "module": "./dist/98-components.js",
     "exports": {
         ".": {
-            "import": "./dist/98-components-client.js",
-            "require": "./dist/98-components-client.umd.cjs"
+            "import": "./dist/98-components.js",
+            "require": "./dist/98-components.umd.cjs"
         }
     },
     "scripts": {

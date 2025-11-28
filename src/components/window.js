@@ -86,50 +86,50 @@ class Win98Window extends HTMLElement {
     const closeBtn = this.shadowRoot.querySelector('[aria-label="Close"]');
     const helpBtn = this.shadowRoot.querySelector('[aria-label="Help"]');
 
-    // Drag and Drop (Native API)
-    titleBar.setAttribute('draggable', 'true');
+    // Drag and Drop (Mouse Events for XOR Visual)
+    // We cannot use native Drag & Drop API because setDragImage doesn't support mix-blend-mode
 
-    let startX, startY;
+    titleBar.addEventListener('mousedown', (e) => {
+      // Prevent dragging if clicking buttons
+      if (e.target.tagName === 'BUTTON') return;
 
-    // Global dragover handler to allow dropping and prevent animation delay
-    const dragOverHandler = (e) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    };
 
-    titleBar.addEventListener('dragstart', (e) => {
       const rect = this.getBoundingClientRect();
-      startX = e.clientX - rect.left;
-      startY = e.clientY - rect.top;
-      e.dataTransfer.effectAllowed = 'move';
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
 
-      // Create custom ghost image (dotted outline)
+      // Create ghost outline with XOR effect
       const ghost = document.createElement('div');
-      ghost.style.width = `${rect.width}px`;
-      ghost.style.height = `${rect.height}px`;
-      ghost.style.border = '2px dotted black';
-      ghost.style.position = 'absolute';
-      ghost.style.top = '-9999px';
-      ghost.style.left = '-9999px';
-      ghost.style.zIndex = '9999';
+      ghost.style.position = 'fixed';
+      ghost.style.width = `${rect.width - 4}px`; // Adjust for border width
+      ghost.style.height = `${rect.height - 4}px`;
+      ghost.style.left = `${rect.left}px`;
+      ghost.style.top = `${rect.top}px`;
+      ghost.style.border = '2px solid white';
+      ghost.style.mixBlendMode = 'difference';
+      ghost.style.zIndex = '99999';
+      ghost.style.pointerEvents = 'none';
       document.body.appendChild(ghost);
 
-      e.dataTransfer.setDragImage(ghost, startX, startY);
+      const moveHandler = (moveEvent) => {
+        ghost.style.left = `${moveEvent.clientX - offsetX}px`;
+        ghost.style.top = `${moveEvent.clientY - offsetY}px`;
+      };
 
-      // Remove ghost from DOM after it's been used for the drag image
-      setTimeout(() => {
+      const upHandler = (upEvent) => {
+        document.removeEventListener('mousemove', moveHandler);
+        document.removeEventListener('mouseup', upHandler);
+
+        // Commit position
+        this.style.left = `${upEvent.clientX - offsetX}px`;
+        this.style.top = `${upEvent.clientY - offsetY}px`;
+
         document.body.removeChild(ghost);
-      }, 0);
+      };
 
-      document.addEventListener('dragover', dragOverHandler);
-    });
-
-    titleBar.addEventListener('dragend', (e) => {
-      e.preventDefault();
-      document.removeEventListener('dragover', dragOverHandler);
-
-      this.style.left = `${e.clientX - startX}px`;
-      this.style.top = `${e.clientY - startY}px`;
+      document.addEventListener('mousemove', moveHandler);
+      document.addEventListener('mouseup', upHandler);
     });
 
     // Controls

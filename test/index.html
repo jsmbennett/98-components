@@ -4,71 +4,131 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>98-components</title>
+    <title>98-components Library</title>
     <style>
         body {
-            background-color: #008080;
-            font-family: "Pixelated MS Sans Serif", Arial;
             margin: 0;
-            padding: 20px;
-            height: 100vh;
+            padding: 0;
+            font-family: "Pixelated MS Sans Serif", Arial;
             overflow: hidden;
         }
 
-        .tree-view {
+        .library-layout {
+            display: flex;
             height: 100%;
-            overflow-y: auto;
+            overflow: hidden;
+        }
+
+        .example-pane {
+            flex: 1;
+            padding: 20px;
+            background: #c0c0c0;
+            overflow: auto;
+            position: relative;
+        }
+
+        .tree-view {
+            list-style: none;
+            padding: 0;
             margin: 0;
+        }
+
+        .tree-view ul {
+            list-style: none;
+            padding-left: 16px;
+        }
+
+        .tree-view summary {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tree-view a {
+            text-decoration: none;
+            color: black;
+            display: block;
+            padding: 2px 4px;
+        }
+
+        .tree-view a:hover {
+            background-color: #000080;
+            color: white;
+        }
+
+        .tree-view a.active {
+            background-color: #000080;
+            color: white;
         }
     </style>
 </head>
 
 <body>
-    <win98-window title="Components" resizable style="top: 20px; left: 20px; width: 250px; height: calc(100vh - 40px);">
-        <ul class="tree-view">
-            <li>
-                <details open>
-                    <summary>Base Components</summary>
-                    <ul>
-                        <li>
-                            <details open>
-                                <summary>Window</summary>
-                                <ul>
-                                    <li><a href="#window-basic" id="nav-window-basic">Basic</a></li>
-                                    <li><a href="#window-resizable" id="nav-window-resizable">Resizable</a></li>
-                                    <li><a href="#window-status" id="nav-window-status">With Status Bar</a></li>
-                                    <li><a href="#window-inactive" id="nav-window-inactive">Inactive</a></li>
-                                    <li><a href="#window-help" id="nav-window-help">Help Button</a></li>
-                                </ul>
-                            </details>
-                        </li>
-                        <li>
-                            <details open>
-                                <summary>Button</summary>
-                                <ul>
-                                    <li><a href="#button-basic" id="nav-button-basic">Basic</a></li>
-                                    <li><a href="#button-default" id="nav-button-default">Default</a></li>
-                                    <li><a href="#button-disabled" id="nav-button-disabled">Disabled</a></li>
-                                </ul>
-                            </details>
-                        </li>
-                        <li>
-                            <details open>
-                                <summary>Form Controls</summary>
-                                <ul>
-                                    <li><a href="#select" id="nav-select">Select / Dropdown</a></li>
-                                </ul>
-                            </details>
-                        </li>
-                    </ul>
-                </details>
-            </li>
-        </ul>
-    </win98-window>
+    <win98-desktop>
+        <!-- Main Library Window -->
+        <win98-window title="Component Library" resizable style="top: 20px; left: 20px; width: 800px; height: 500px;">
+            <div class="library-layout">
+                <ul class="tree-view">
+                    <li>
+                        <details open>
+                            <summary>Base Components</summary>
+                            <ul>
+                                <li>
+                                    <details open>
+                                        <summary>Window</summary>
+                                        <ul>
+                                            <li><a href="#window-basic" id="nav-window-basic">Basic</a></li>
+                                            <li><a href="#window-resizable" id="nav-window-resizable">Resizable</a>
+                                            </li>
+                                            <li><a href="#window-status" id="nav-window-status">With Status Bar</a>
+                                            </li>
+                                            <li><a href="#window-inactive" id="nav-window-inactive">Inactive</a>
+                                            </li>
+                                            <li><a href="#window-help" id="nav-window-help">Help Button</a></li>
+                                        </ul>
+                                    </details>
+                                </li>
+                                <li>
+                                    <details open>
+                                        <summary>Button</summary>
+                                        <ul>
+                                            <li><a href="#button-basic" id="nav-button-basic">Basic</a></li>
+                                            <li><a href="#button-default" id="nav-button-default">Default</a></li>
+                                            <li><a href="#button-disabled" id="nav-button-disabled">Disabled</a>
+                                            </li>
+                                        </ul>
+                                    </details>
+                                </li>
+                                <li>
+                                    <details open>
+                                        <summary>Form Controls</summary>
+                                        <ul>
+                                            <li><a href="#select" id="nav-select">Select / Dropdown</a></li>
+                                        </ul>
+                                    </details>
+                                </li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <details open>
+                            <summary>Desktop Environment</summary>
+                            <ul>
+                                <li><a href="#desktop-demo" id="nav-desktop-demo">Launch Demo Windows</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+                <div class="example-pane" id="example-stage">
+                    <p>Select a component from the tree view to see an example.</p>
+                </div>
+            </div>
+            <div slot="status">98-components Library v0.0.1</div>
+        </win98-window>
 
-    <div id="desktop-stage"></div>
+        <win98-taskbar slot="taskbar"></win98-taskbar>
+    </win98-desktop>
 
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="./component-library.js"></script>
 </body>
 
 </html>

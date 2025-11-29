@@ -1,4 +1,5 @@
 import win98Styles from '98.css?inline';
+import { windowManager } from '../services/WindowManager.js';
 
 class Win98Window extends HTMLElement {
   constructor() {
@@ -10,6 +11,14 @@ class Win98Window extends HTMLElement {
     this.render();
   }
 
+  disconnectedCallback() {
+    // Unregister from WindowManager when removed
+    const windowId = this.dataset.windowId;
+    if (windowId) {
+      windowManager.unregister(windowId);
+    }
+  }
+
   static get observedAttributes() {
     return ['title', 'resizable', 'inactive', 'show-help', 'status-bar', 'show-minimize', 'show-maximize'];
   }
@@ -17,6 +26,11 @@ class Win98Window extends HTMLElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (this.shadowRoot) {
       this.render();
+
+      // Update WindowManager if title changes
+      if (name === 'title' && this.dataset.windowId) {
+        windowManager.updateWindow(this.dataset.windowId, { title: newValue });
+      }
     }
   }
 
@@ -46,7 +60,6 @@ class Win98Window extends HTMLElement {
         }
         .window-body {
           flex: 1;
-          overflow: auto;
         }
         .resize-handle {
           position: absolute;
@@ -86,59 +99,66 @@ class Win98Window extends HTMLElement {
     const closeBtn = this.shadowRoot.querySelector('[aria-label="Close"]');
     const helpBtn = this.shadowRoot.querySelector('[aria-label="Help"]');
 
+    // Focus window when clicked anywhere
+    this.addEventListener('mousedown', (e) => {
+      this.dispatchEvent(new CustomEvent('window-focus', {
+        bubbles: true,
+        composed: true
+      }));
+    });
+
     // Drag and Drop (Mouse Events for XOR Visual)
     // We cannot use native Drag & Drop API because setDragImage doesn't support mix-blend-mode
 
-    titleBar.addEventListener('mousedown', (e) => {
-      // Prevent dragging if clicking buttons
-      if (e.target.tagName === 'BUTTON') return;
+    if (!this.hasAttribute('no-drag')) {
+      titleBar.addEventListener('mousedown', (e) => {
+        // Prevent dragging if clicking buttons
+        if (e.target.tagName === 'BUTTON') return;
 
-      e.preventDefault();
+        e.preventDefault();
 
-      const rect = this.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      const offsetY = e.clientY - rect.top;
+        const rect = this.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
 
-      // Create ghost outline with XOR effect
-      const ghost = document.createElement('div');
-      ghost.style.position = 'fixed';
-      ghost.style.width = `${rect.width - 4}px`; // Adjust for border width
-      ghost.style.height = `${rect.height - 4}px`;
-      ghost.style.left = `${rect.left}px`;
-      ghost.style.top = `${rect.top}px`;
-      ghost.style.border = '2px solid white';
-      ghost.style.mixBlendMode = 'difference';
-      ghost.style.zIndex = '99999';
-      ghost.style.pointerEvents = 'none';
-      document.body.appendChild(ghost);
+        // Create ghost outline with XOR effect
+        const ghost = document.createElement('div');
+        ghost.style.position = 'fixed';
+        ghost.style.width = `${rect.width - 4}px`; // Adjust for border width
+        ghost.style.height = `${rect.height - 4}px`;
+        ghost.style.left = `${rect.left}px`;
+        ghost.style.top = `${rect.top}px`;
+        ghost.style.border = '2px solid white';
+        ghost.style.mixBlendMode = 'difference';
+        ghost.style.zIndex = '99999';
+        ghost.style.pointerEvents = 'none';
+        document.body.appendChild(ghost);
 
-      const moveHandler = (moveEvent) => {
-        ghost.style.left = `${moveEvent.clientX - offsetX}px`;
-        ghost.style.top = `${moveEvent.clientY - offsetY}px`;
-      };
+        const moveHandler = (moveEvent) => {
+          ghost.style.left = `${moveEvent.clientX - offsetX}px`;
+          ghost.style.top = `${moveEvent.clientY - offsetY}px`;
+        };
 
-      const upHandler = (upEvent) => {
-        document.removeEventListener('mousemove', moveHandler);
-        document.removeEventListener('mouseup', upHandler);
+        const upHandler = (upEvent) => {
+          document.removeEventListener('mousemove', moveHandler);
+          document.removeEventListener('mouseup', upHandler);
 
-        // Commit position
-        this.style.left = `${upEvent.clientX - offsetX}px`;
-        this.style.top = `${upEvent.clientY - offsetY}px`;
+          // Commit position
+          this.style.left = `${upEvent.clientX - offsetX}px`;
+          this.style.top = `${upEvent.clientY - offsetY}px`;
 
-        document.body.removeChild(ghost);
-      };
+          document.body.removeChild(ghost);
+        };
 
-      document.addEventListener('mousemove', moveHandler);
-      document.addEventListener('mouseup', upHandler);
-    });
+        document.addEventListener('mousemove', moveHandler);
+        document.addEventListener('mouseup', upHandler);
+      });
+    }
 
     // Controls
     if (minimizeBtn) {
       minimizeBtn.addEventListener('click', () => {
         this.dispatchEvent(new CustomEvent('window-minimize', { bubbles: true, composed: true }));
-        // Simple minimize behavior: toggle visibility of body
-        const body = this.shadowRoot.querySelector('.window-body');
-        body.style.display = body.style.display === 'none' ? 'block' : 'none';
       });
     }
 

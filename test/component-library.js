@@ -252,41 +252,22 @@ function launchDesktopDemo() {
         width: 450,
         height: 350,
         content: `
-        <div class="window-body">
-            <textarea style="width: 100%; height: 100%; resize: none; font-family: 'Courier New', monospace; border: none; padding: 4px;">Welcome to Notepad!
-
-This is a demonstration of the new Windows 98 component architecture.
-
-Features:
-- Desktop component acts as the root container
-- WindowManager service handles all state
-- Taskbar shows all open windows
-- Click windows to focus them
-- Use minimize button to minimize to taskbar
-- Click taskbar buttons to restore windows
-</textarea>
-        </div>
-        <div slot="status">Ready</div>
+        <textarea style="width: 100%; height: 100%; resize: none;">Welcome to Notepad!</textarea>
         `
     });
 
-    // Control Panel
+    // Window Creator
     const controlPanel = desktop.createWindow({
-        title: 'Control Panel',
+        title: 'Window Creator',
         x: 200,
         y: 150,
         width: 320,
-        height: 240,
+        height: 120,
         content: `
         <div class="window-body">
             <p><strong>Window Management:</strong></p>
             <button id="create-window-btn">Create New Window</button>
             <button id="create-dialog-btn">Create Dialog</button>
-            <hr>
-            <p><strong>Arrange Windows:</strong></p>
-            <button id="cascade-btn">Cascade Windows</button>
-            <button id="tile-btn">Tile Windows</button>
-            <hr>
             <p style="font-size: 11px; color: #666;">
                 Open windows: <span id="window-count">0</span>
             </p>
@@ -312,7 +293,7 @@ Features:
             height: 250,
             content: `
               <div class="window-body">
-                <h2>Window ${windowCounter}</h2>
+                <p><strong>Window ${windowCounter}</strong></p>
                 <p>This window was created programmatically.</p>
                 <button onclick="this.closest('win98-window').remove()">Close This Window</button>
               </div>

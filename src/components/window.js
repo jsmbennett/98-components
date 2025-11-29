@@ -34,7 +34,34 @@ class Win98Window extends HTMLElement {
     }
   }
 
-  render() {
+  static get componentStyles() {
+    return `
+      :host {
+        display: block;
+        position: absolute;
+      }
+      .window {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .window-body {
+        flex: 1;
+      }
+      .resize-handle {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 20px;
+        height: 20px;
+        cursor: nwse-resize;
+        z-index: 10;
+      }
+    `;
+  }
+
+  getTemplate() {
     const title = this.getAttribute('title') || 'Window';
     const inactive = this.hasAttribute('inactive');
     const showHelp = this.hasAttribute('show-help');
@@ -42,35 +69,7 @@ class Win98Window extends HTMLElement {
     const showMinimize = this.hasAttribute('show-minimize') !== false && !showHelp;
     const showMaximize = this.hasAttribute('show-maximize') !== false;
 
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(win98Styles);
-    this.shadowRoot.adoptedStyleSheets = [sheet];
-
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          position: absolute;
-        }
-        .window {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-        }
-        .window-body {
-          flex: 1;
-        }
-        .resize-handle {
-          position: absolute;
-          bottom: -2px;
-          right: -2px;
-          width: 20px;
-          height: 20px;
-          cursor: nwse-resize;
-          z-index: 10;
-        }
-      </style>
+    return `
       <div class="window">
         <div class="title-bar${inactive ? ' inactive' : ''}">
           <div class="title-bar-text">${title}</div>
@@ -88,6 +87,22 @@ class Win98Window extends HTMLElement {
         ${this.hasAttribute('resizable') ? '<div class="resize-handle"></div>' : ''}
       </div>
     `;
+  }
+
+  render() {
+    // Import 98.css styles
+    const win98Sheet = new CSSStyleSheet();
+    win98Sheet.replaceSync(win98Styles);
+
+    // Component-specific styles
+    const componentSheet = new CSSStyleSheet();
+    componentSheet.replaceSync(Win98Window.componentStyles);
+
+    // Apply both stylesheets
+    this.shadowRoot.adoptedStyleSheets = [win98Sheet, componentSheet];
+
+    // Set HTML content
+    this.shadowRoot.innerHTML = this.getTemplate();
 
     this.setupInteractions();
   }

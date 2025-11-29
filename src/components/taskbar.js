@@ -1,5 +1,6 @@
 import win98Styles from '98.css?inline';
 import { windowManager } from '../services/WindowManager.js';
+import windowsLogo from '../resources/icons/windows-logo.png';
 
 /**
  * Win98Taskbar - The taskbar component
@@ -56,13 +57,17 @@ class Win98Taskbar extends HTMLElement {
           display: flex;
           align-items: center;
           gap: 4px;
+          min-width: auto;
           flex-shrink: 0;
         }
 
         .start-icon {
           width: 16px;
           height: 16px;
-          background: linear-gradient(135deg, #ff0000 0%, #ff6600 50%, #ffcc00 100%);
+          background-image: url('${windowsLogo}');
+          background-size: contain;
+          background-repeat: no-repeat;
+          background-position: center;
           border-radius: 2px;
         }
 
@@ -93,6 +98,8 @@ class Win98Taskbar extends HTMLElement {
 
         .task-button.active {
           box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+          background-color: #ffffff;
+          font-weight: 700;
         }
 
         .task-button.minimized {

@@ -37,3 +37,7 @@ option {
     background-color: #fff;
     color: #000;
 }
+
+.window-body {
+    height: 100%;
+}

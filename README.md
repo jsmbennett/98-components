@@ -1,6 +1,6 @@
 # 98-components
 
-A modern Windows 98 UI component library built with Web Components (ES2022).
+A modern Windows 98 UI component library built with Web Components (ES2022), with 98.css as its only dependency.
 
 ## Quick Start
 

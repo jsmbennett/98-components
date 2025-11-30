@@ -6,6 +6,16 @@
     font-style: normal;
 }
 
+html,
+body,
+button,
+select,
+div {
+    cursor: url('../resources/icons/default.png') 11 11, auto;
+}
+
+
+
 body {
     font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
     font-size: 12px;

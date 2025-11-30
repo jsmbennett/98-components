@@ -58,6 +58,14 @@ class Win98Window extends HTMLElement {
         cursor: nwse-resize;
         z-index: 10;
       }
+      .maximize-animation {
+        position: fixed;
+        background: linear-gradient(to right, #000080, #1084d0);
+        border: 2px solid white;
+        mix-blend-mode: difference;
+        z-index: 99999;
+        pointer-events: none;
+      }
     `;
   }
 

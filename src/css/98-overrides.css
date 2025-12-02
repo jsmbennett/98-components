@@ -14,12 +14,9 @@ div {
     cursor: url('../resources/icons/default.png') 11 11, auto;
 }
 
-
-
 body {
     font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
-    font-size: 12px;
-    color: var(--text-color);
+    font-size: 1px;
 }
 
 textarea {

@@ -1,4 +1,4 @@
-import win98Styles from '98.css?inline';
+import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
 import windowsLogo from '../resources/icons/windows-logo.png';
 
@@ -60,7 +60,9 @@ class Win98Taskbar extends HTMLElement {
           min-width: auto;
           flex-shrink: 0;
         }
-
+        .start-button:active .start-icon {
+          transform: translate(1px, 1px);
+        }
         .start-icon {
           width: 16px;
           height: 16px;

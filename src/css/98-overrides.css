@@ -1,4 +1,7 @@
 /* 98.css overrides deemed worthy of change */
+@import "98.css";
+
+
 @font-face {
     font-family: 'FixederSys1x';
     src: url('../resources/font/FixederSys1x.ttf') format('truetype');
@@ -6,22 +9,40 @@
     font-style: normal;
 }
 
+html {
+    font-smooth: never !important;
+    user-select: none !important;
+}
+
 html,
 body,
-button,
 select,
-div {
-    cursor: url('../resources/icons/default.png') 11 11, auto;
+button,
+div,
+option {
+    cursor: url('../resources/icons/default.png') 11 11, auto !important;
+}
+
+.resize-handle {
+    cursor: url('../resources/icons/resize-fs.png') 2 2, auto !important;
+}
+
+::selection {
+    background-color: #000080;
+    color: #fff
 }
 
 body {
     font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
     font-size: 1px;
+    margin: 0;
+    padding: 0;
 }
 
 textarea {
     font-family: 'FixederSys1x', monospace;
     font-size: 16px;
+    user-select: text !important;
 }
 
 option {

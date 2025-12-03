@@ -1,4 +1,4 @@
-import win98Styles from '98.css?inline';
+import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
 
 class Win98Window extends HTMLElement {

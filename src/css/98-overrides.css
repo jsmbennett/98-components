@@ -1,10 +1,16 @@
 /* 98.css overrides deemed worthy of change */
 @import "98.css";
 
-
 @font-face {
     font-family: 'FixederSys1x';
     src: url('../resources/font/FixederSys1x.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MS Sans Serif';
+    src: url('../resources/font/ms-sans-serif.ttf') format('woff2');
     font-weight: normal;
     font-style: normal;
 }
@@ -54,4 +60,58 @@ option {
 
 .window-body {
     height: 100%;
+}
+
+/* Start Menu Items */
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: default;
+    color: black;
+    height: 24px;
+}
+
+.menu-item:hover {
+    background-color: #000080;
+    color: white;
+}
+
+.menu-item:hover .menu-item-arrow {
+    border-left-color: white;
+}
+
+.menu-item-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-item-icon img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.menu-item-text {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.menu-item-arrow {
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 4px solid black;
+    margin-left: 8px;
+}
+
+.separator {
+    height: 1px;
+    background: white;
+    border-top: 1px solid gray;
+    margin: 3px 1px;
 }

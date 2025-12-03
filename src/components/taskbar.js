@@ -1,6 +1,7 @@
 import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
 import windowsLogo from '../resources/icons/windows-logo.png';
+import Win98StartMenu from './startmenu.js';
 
 /**
  * Win98Taskbar - The taskbar component
@@ -60,8 +61,15 @@ class Win98Taskbar extends HTMLElement {
           min-width: auto;
           flex-shrink: 0;
         }
-        .start-button:active .start-icon {
+        .start-button:active .start-icon,
+        .start-button.active .start-icon {
           transform: translate(1px, 1px);
+        }
+        .start-button.active {
+          box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+          padding: 1px 7px 0 9px; /* Adjust padding to simulate press */
+          outline: 1px dotted #000000;
+          outline-offset: -4px;
         }
         .start-icon {
           width: 16px;
@@ -127,6 +135,55 @@ class Win98Taskbar extends HTMLElement {
         }
       </style>
       <div class="taskbar">
+        <win98-start-menu id="start-menu">
+            <div class="menu-item" role="menuitem">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Windows Update</div>
+            </div>
+            <div class="separator" role="separator"></div>
+            <div class="menu-item" role="menuitem" aria-haspopup="true">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Programs</div>
+                <div class="menu-item-arrow"></div>
+            </div>
+            <div class="menu-item" role="menuitem" aria-haspopup="true">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Favorites</div>
+                <div class="menu-item-arrow"></div>
+            </div>
+            <div class="menu-item" role="menuitem" aria-haspopup="true">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Documents</div>
+                <div class="menu-item-arrow"></div>
+            </div>
+            <div class="menu-item" role="menuitem" aria-haspopup="true">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Settings</div>
+                <div class="menu-item-arrow"></div>
+            </div>
+            <div class="menu-item" role="menuitem" aria-haspopup="true">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Find</div>
+                <div class="menu-item-arrow"></div>
+            </div>
+            <div class="menu-item" role="menuitem">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Help</div>
+            </div>
+            <div class="menu-item" role="menuitem">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Run...</div>
+            </div>
+            <div class="separator" role="separator"></div>
+            <div class="menu-item" role="menuitem">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Log Off...</div>
+            </div>
+            <div class="menu-item" role="menuitem">
+                <div class="menu-item-icon"></div>
+                <div class="menu-item-text">Shut Down...</div>
+            </div>
+        </win98-start-menu>
         <button class="start-button">
           <div class="start-icon"></div>
           <span>Start</span>
@@ -154,12 +211,41 @@ class Win98Taskbar extends HTMLElement {
 
     // Start button click
     const startButton = this.shadowRoot.querySelector('.start-button');
-    startButton.addEventListener('click', () => {
+    const startMenu = this.shadowRoot.getElementById('start-menu');
+
+    this.boundStartToggle = (e) => {
+      e.stopPropagation();
+      const isVisible = startMenu.hasAttribute('visible');
+
+      if (isVisible) {
+        startMenu.removeAttribute('visible');
+        startButton.classList.remove('active');
+      } else {
+        startMenu.setAttribute('visible', '');
+        startButton.classList.add('active');
+      }
+
       this.dispatchEvent(new CustomEvent('start-menu-toggle', {
         bubbles: true,
-        composed: true
+        composed: true,
+        detail: { visible: !isVisible }
       }));
-    });
+    };
+
+    startButton.addEventListener('click', this.boundStartToggle);
+
+    // Close menu when clicking outside
+    this.boundOutsideClick = (e) => {
+      if (startMenu.hasAttribute('visible')) {
+        const path = e.composedPath();
+        if (!path.includes(this.shadowRoot.querySelector('.start-button')) &&
+          !path.includes(startMenu)) {
+          startMenu.removeAttribute('visible');
+          startButton.classList.remove('active');
+        }
+      }
+    };
+    window.addEventListener('mousedown', this.boundOutsideClick);
   }
 
   cleanup() {
@@ -170,6 +256,13 @@ class Win98Taskbar extends HTMLElement {
     windowManager.removeEventListener('window-minimized', this.boundUpdateTasks);
     windowManager.removeEventListener('window-restored', this.boundUpdateTasks);
     windowManager.removeEventListener('window-updated', this.boundUpdateTasks);
+
+    // Remove event listeners
+    const startButton = this.shadowRoot.querySelector('.start-button');
+    if (startButton) {
+      startButton.removeEventListener('click', this.boundStartToggle);
+    }
+    window.removeEventListener('mousedown', this.boundOutsideClick);
 
     // Clear clock interval
     if (this.clockInterval) {

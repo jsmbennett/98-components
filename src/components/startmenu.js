@@ -17,7 +17,7 @@ class Win98StartMenu extends HTMLElement {
         position: absolute;
         bottom: 28px;
         left: 2px;
-        z-index: 99999;
+        z-index: -1;
         font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
         font-size: 11px;
       }
@@ -32,6 +32,19 @@ class Win98StartMenu extends HTMLElement {
         box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
         padding: 2px;
         min-width: 180px;
+        animation: slide-up 0.15s ease-out;
+        transform-origin: bottom left;
+      }
+
+      @keyframes slide-up {
+        from {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
       }
 
       .sidebar {

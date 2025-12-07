@@ -136,53 +136,7 @@ class Win98Taskbar extends HTMLElement {
       </style>
       <div class="taskbar">
         <win98-start-menu id="start-menu">
-            <div class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Windows Update</div>
-            </div>
-            <div class="separator" role="separator"></div>
-            <div class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Programs</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Favorites</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Documents</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Settings</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Find</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Help</div>
-            </div>
-            <div class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Run...</div>
-            </div>
-            <div class="separator" role="separator"></div>
-            <div class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Log Off...</div>
-            </div>
-            <div class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Shut Down...</div>
-            </div>
+          <slot name="start-menu"></slot>
         </win98-start-menu>
         <button class="start-button">
           <div class="start-icon"></div>

@@ -1,5 +1,6 @@
 import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
+import resizeCursor from '../resources/icons/resize-fs.png';
 
 class Win98Window extends HTMLElement {
   constructor() {
@@ -228,6 +229,7 @@ class Win98Window extends HTMLElement {
           e.preventDefault();
           e.stopPropagation();
 
+          const rect = this.getBoundingClientRect();
           const startX = e.clientX;
           const startY = e.clientY;
           const startWidth = parseInt(getComputedStyle(this).width, 10);
@@ -236,16 +238,52 @@ class Win98Window extends HTMLElement {
           const minWidth = 100;
           const minHeight = 100;
 
+          // Create cursor overlay to maintain resize cursor
+          const cursorOverlay = document.createElement('div');
+          cursorOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 99998;
+            cursor: url(${resizeCursor}) 2 2, nwse-resize !important;
+          `;
+          document.body.appendChild(cursorOverlay);
+
+          // Create ghost outline with XOR effect
+          const ghost = document.createElement('div');
+          ghost.style.position = 'fixed';
+          ghost.style.width = `${rect.width - 4}px`; // Adjust for border width
+          ghost.style.height = `${rect.height - 4}px`;
+          ghost.style.left = `${rect.left}px`;
+          ghost.style.top = `${rect.top}px`;
+          ghost.style.border = '2px solid white';
+          ghost.style.mixBlendMode = 'difference';
+          ghost.style.zIndex = '99999';
+          ghost.style.pointerEvents = 'none';
+          document.body.appendChild(ghost);
+
           const mouseMoveHandler = (e) => {
+            const newWidth = Math.max(minWidth, startWidth + (e.clientX - startX));
+            const newHeight = Math.max(minHeight, startHeight + (e.clientY - startY));
+            ghost.style.width = `${newWidth - 4}px`; // Adjust for border width
+            ghost.style.height = `${newHeight - 4}px`;
+          };
+
+          const mouseUpHandler = (e) => {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+
+            // Commit size
             const newWidth = Math.max(minWidth, startWidth + (e.clientX - startX));
             const newHeight = Math.max(minHeight, startHeight + (e.clientY - startY));
             this.style.width = `${newWidth}px`;
             this.style.height = `${newHeight}px`;
-          };
 
-          const mouseUpHandler = () => {
-            document.removeEventListener('mousemove', mouseMoveHandler);
-            document.removeEventListener('mouseup', mouseUpHandler);
+            // Remove overlays
+            document.body.removeChild(cursorOverlay);
+            document.body.removeChild(ghost);
           };
 
           document.addEventListener('mousemove', mouseMoveHandler);

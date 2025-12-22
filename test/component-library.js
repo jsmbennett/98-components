@@ -330,15 +330,13 @@ function launchDesktopDemo() {
     width: 320,
     height: 120,
     content: `
-        <div class="window-body">
-            <p><strong>Window Management:</strong></p>
-            <button id="create-window-btn">Create New Window</button>
-            <button id="create-dialog-btn">Create Dialog</button>
-            <p>
-                Open windows: <span id="window-count">0</span>
-            </p>
-        </div>
-        `
+          <p><strong>Window Management:</strong></p>
+          <button id="create-window-btn">Create New Window</button>
+          <button id="create-dialog-btn">Create Dialog</button>
+          <p>
+              Open windows: <span id="window-count">0</span>
+          </p>
+=        `
   });
 
   // Wire up Control Panel buttons
@@ -358,11 +356,9 @@ function launchDesktopDemo() {
       width: 350,
       height: 250,
       content: `
-              <div class="window-body">
-                <p><strong>Window ${windowCounter}</strong></p>
-                <p>This window was created programmatically.</p>
-                <button onclick="this.closest('win98-window').remove()">Close This Window</button>
-              </div>
+              <p><strong>Window ${windowCounter}</strong></p>
+              <p>This window was created programmatically.</p>
+              <button onclick="this.closest('win98-window').remove()">Close This Window</button>
             `
     });
     windowCounter++;

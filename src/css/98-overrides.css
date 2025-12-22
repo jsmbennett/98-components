@@ -33,8 +33,24 @@ a {
     cursor: url('../resources/icons/pointer.png') 11 11, auto !important;
 }
 
-.resize-handle {
-    cursor: url('../resources/icons/resize-fs.png') 2 2, auto !important;
+.resize-handle-nw,
+.resize-handle-se {
+    cursor: url('../resources/icons/resize-fs.png') 2 2, nwse-resize !important;
+}
+
+.resize-handle-ne,
+.resize-handle-sw {
+    cursor: url('../resources/icons/resize-bs.png') 2 2, nesw-resize !important;
+}
+
+.resize-handle-n,
+.resize-handle-s {
+    cursor: url('../resources/icons/resize-ud.png') 2 2, ns-resize !important;
+}
+
+.resize-handle-w,
+.resize-handle-e {
+    cursor: url('../resources/icons/resize-lr.png') 2 2, ew-resize !important;
 }
 
 ::selection {

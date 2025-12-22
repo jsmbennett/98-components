@@ -33,9 +33,6 @@ class Win98Button extends HTMLElement {
         :host {
           display: inline-block;
         }
-        button {
-          cursor: pointer;
-        }
         button:disabled {
           cursor: default;
         }

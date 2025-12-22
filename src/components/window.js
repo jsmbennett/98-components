@@ -1,6 +1,9 @@
 import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
-import resizeCursor from '../resources/icons/resize-fs.png';
+import resizeFsCursor from '../resources/icons/resize-fs.png';
+import resizeBsCursor from '../resources/icons/resize-bs.png';
+import resizeUdCursor from '../resources/icons/resize-ud.png';
+import resizeLrCursor from '../resources/icons/resize-lr.png';
 
 class Win98Window extends HTMLElement {
   constructor() {
@@ -52,12 +55,63 @@ class Win98Window extends HTMLElement {
       }
       .resize-handle {
         position: absolute;
+        z-index: 10;
+      }
+      .resize-handle-nw {
+        top: -2px;
+        left: -2px;
+        width: 6px;
+        height: 6px;
+        cursor: nwse-resize;
+      }
+      .resize-handle-n {
+        top: -2px;
+        left: 6px;
+        right: 6px;
+        height: 4px;
+        cursor: ns-resize;
+      }
+      .resize-handle-ne {
+        top: -2px;
+        right: -2px;
+        width: 6px;
+        height: 6px;
+        cursor: nesw-resize;
+      }
+      .resize-handle-w {
+        top: 6px;
+        left: -2px;
+        bottom: 6px;
+        width: 4px;
+        cursor: ew-resize;
+      }
+      .resize-handle-e {
+        top: 6px;
+        right: -2px;
+        bottom: 6px;
+        width: 4px;
+        cursor: ew-resize;
+      }
+      .resize-handle-sw {
+        bottom: -2px;
+        left: -2px;
+        width: 6px;
+        height: 6px;
+        cursor: nesw-resize;
+      }
+      .resize-handle-s {
+        bottom: -2px;
+        left: 6px;
+        right: 6px;
+        height: 4px;
+        cursor: ns-resize;
+      }
+      .resize-handle-se {
         bottom: -2px;
         right: -2px;
-        width: 20px;
-        height: 20px;
+        width: 6px;
+        height: 6px;
         cursor: nwse-resize;
-        z-index: 10;
       }
       .maximize-animation {
         position: fixed;
@@ -93,7 +147,16 @@ class Win98Window extends HTMLElement {
           <slot></slot>
         </div>
         ${statusBar ? '<div class="status-bar"><slot name="status"></slot></div>' : ''}
-        ${this.hasAttribute('resizable') ? '<div class="resize-handle"></div>' : ''}
+        ${this.hasAttribute('resizable') ? `
+          <div class="resize-handle resize-handle-nw"></div>
+          <div class="resize-handle resize-handle-n"></div>
+          <div class="resize-handle resize-handle-ne"></div>
+          <div class="resize-handle resize-handle-w"></div>
+          <div class="resize-handle resize-handle-e"></div>
+          <div class="resize-handle resize-handle-sw"></div>
+          <div class="resize-handle resize-handle-s"></div>
+          <div class="resize-handle resize-handle-se"></div>
+        ` : ''}
       </div>
     `;
   }
@@ -223,74 +286,137 @@ class Win98Window extends HTMLElement {
 
     // Resize functionality
     if (this.hasAttribute('resizable')) {
-      const resizeHandle = this.shadowRoot.querySelector('.resize-handle');
-      if (resizeHandle) {
-        resizeHandle.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const rect = this.getBoundingClientRect();
-          const startX = e.clientX;
-          const startY = e.clientY;
-          const startWidth = parseInt(getComputedStyle(this).width, 10);
-          const startHeight = parseInt(getComputedStyle(this).height, 10);
-
-          const minWidth = 100;
-          const minHeight = 100;
-
-          // Create cursor overlay to maintain resize cursor
-          const cursorOverlay = document.createElement('div');
-          cursorOverlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 99998;
-            cursor: url(${resizeCursor}) 2 2, nwse-resize !important;
-          `;
-          document.body.appendChild(cursorOverlay);
-
-          // Create ghost outline with XOR effect
-          const ghost = document.createElement('div');
-          ghost.style.position = 'fixed';
-          ghost.style.width = `${rect.width - 4}px`; // Adjust for border width
-          ghost.style.height = `${rect.height - 4}px`;
-          ghost.style.left = `${rect.left}px`;
-          ghost.style.top = `${rect.top}px`;
-          ghost.style.border = '2px solid white';
-          ghost.style.mixBlendMode = 'difference';
-          ghost.style.zIndex = '99999';
-          ghost.style.pointerEvents = 'none';
-          document.body.appendChild(ghost);
-
-          const mouseMoveHandler = (e) => {
-            const newWidth = Math.max(minWidth, startWidth + (e.clientX - startX));
-            const newHeight = Math.max(minHeight, startHeight + (e.clientY - startY));
-            ghost.style.width = `${newWidth - 4}px`; // Adjust for border width
-            ghost.style.height = `${newHeight - 4}px`;
-          };
-
-          const mouseUpHandler = (e) => {
-            document.removeEventListener('mousemove', mouseMoveHandler);
-            document.removeEventListener('mouseup', mouseUpHandler);
-
-            // Commit size
-            const newWidth = Math.max(minWidth, startWidth + (e.clientX - startX));
-            const newHeight = Math.max(minHeight, startHeight + (e.clientY - startY));
-            this.style.width = `${newWidth}px`;
-            this.style.height = `${newHeight}px`;
-
-            // Remove overlays
-            document.body.removeChild(cursorOverlay);
-            document.body.removeChild(ghost);
-          };
-
-          document.addEventListener('mousemove', mouseMoveHandler);
-          document.addEventListener('mouseup', mouseUpHandler);
-        });
-      }
+      this.setupResize();
     }
+  }
+
+  setupResize() {
+    const minWidth = 100;
+    const minHeight = 100;
+
+    // Define resize configurations for each handle
+    const resizeConfigs = [
+      { selector: '.resize-handle-nw', cursor: resizeFsCursor, fallback: 'nwse-resize', resizeX: -1, resizeY: -1 },
+      { selector: '.resize-handle-n', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 0, resizeY: -1 },
+      { selector: '.resize-handle-ne', cursor: resizeBsCursor, fallback: 'nesw-resize', resizeX: 1, resizeY: -1 },
+      { selector: '.resize-handle-w', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: -1, resizeY: 0 },
+      { selector: '.resize-handle-e', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: 1, resizeY: 0 },
+      { selector: '.resize-handle-sw', cursor: resizeBsCursor, fallback: 'nesw-resize', resizeX: -1, resizeY: 1 },
+      { selector: '.resize-handle-s', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 0, resizeY: 1 },
+      { selector: '.resize-handle-se', cursor: resizeFsCursor, fallback: 'nwse-resize', resizeX: 1, resizeY: 1 },
+    ];
+
+    resizeConfigs.forEach(config => {
+      const handle = this.shadowRoot.querySelector(config.selector);
+      if (!handle) return;
+
+      handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const rect = this.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = parseInt(getComputedStyle(this).width, 10);
+        const startHeight = parseInt(getComputedStyle(this).height, 10);
+        const startLeft = rect.left;
+        const startTop = rect.top;
+
+        // Create cursor overlay to maintain resize cursor
+        const cursorOverlay = document.createElement('div');
+        cursorOverlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 99998;
+          cursor: url(${config.cursor}) 2 2, ${config.fallback} !important;
+        `;
+        document.body.appendChild(cursorOverlay);
+
+        // Create ghost outline with XOR effect
+        const ghost = document.createElement('div');
+        ghost.style.position = 'fixed';
+        ghost.style.width = `${rect.width - 4}px`;
+        ghost.style.height = `${rect.height - 4}px`;
+        ghost.style.left = `${rect.left}px`;
+        ghost.style.top = `${rect.top}px`;
+        ghost.style.border = '2px solid white';
+        ghost.style.mixBlendMode = 'difference';
+        ghost.style.zIndex = '99999';
+        ghost.style.pointerEvents = 'none';
+        document.body.appendChild(ghost);
+
+        const mouseMoveHandler = (e) => {
+          const deltaX = e.clientX - startX;
+          const deltaY = e.clientY - startY;
+
+          let newWidth = startWidth;
+          let newHeight = startHeight;
+          let newLeft = startLeft;
+          let newTop = startTop;
+
+          // Calculate new dimensions based on resize direction
+          if (config.resizeX === -1) {
+            newWidth = Math.max(minWidth, startWidth - deltaX);
+            newLeft = startLeft + (startWidth - newWidth);
+          } else if (config.resizeX === 1) {
+            newWidth = Math.max(minWidth, startWidth + deltaX);
+          }
+
+          if (config.resizeY === -1) {
+            newHeight = Math.max(minHeight, startHeight - deltaY);
+            newTop = startTop + (startHeight - newHeight);
+          } else if (config.resizeY === 1) {
+            newHeight = Math.max(minHeight, startHeight + deltaY);
+          }
+
+          ghost.style.width = `${newWidth - 4}px`;
+          ghost.style.height = `${newHeight - 4}px`;
+          ghost.style.left = `${newLeft}px`;
+          ghost.style.top = `${newTop}px`;
+        };
+
+        const mouseUpHandler = (e) => {
+          document.removeEventListener('mousemove', mouseMoveHandler);
+          document.removeEventListener('mouseup', mouseUpHandler);
+
+          const deltaX = e.clientX - startX;
+          const deltaY = e.clientY - startY;
+
+          let newWidth = startWidth;
+          let newHeight = startHeight;
+
+          // Calculate final dimensions
+          if (config.resizeX === -1) {
+            newWidth = Math.max(minWidth, startWidth - deltaX);
+            const actualDelta = startWidth - newWidth;
+            this.style.left = `${startLeft + actualDelta}px`;
+          } else if (config.resizeX === 1) {
+            newWidth = Math.max(minWidth, startWidth + deltaX);
+          }
+
+          if (config.resizeY === -1) {
+            newHeight = Math.max(minHeight, startHeight - deltaY);
+            const actualDelta = startHeight - newHeight;
+            this.style.top = `${startTop + actualDelta}px`;
+          } else if (config.resizeY === 1) {
+            newHeight = Math.max(minHeight, startHeight + deltaY);
+          }
+
+          this.style.width = `${newWidth}px`;
+          this.style.height = `${newHeight}px`;
+
+          // Remove overlays
+          document.body.removeChild(cursorOverlay);
+          document.body.removeChild(ghost);
+        };
+
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+      });
+    });
   }
 }
 

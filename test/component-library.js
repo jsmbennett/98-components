@@ -239,53 +239,28 @@ document.getElementById('nav-start-menu')?.addEventListener('click', (e) => {
   div.innerHTML = `
       <p>The Start Menu component with slotted content.</p>
       <win98-start-menu visible style="position: absolute; top: 50px; left: 20px; z-index: auto;">
-        <div class="menu-item" role="menuitem">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Windows Update</div>
-        </div>
-        <div class="separator" role="separator"></div>
-        <div class="menu-item" role="menuitem" aria-haspopup="true">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Programs</div>
-            <div class="menu-item-arrow"></div>
-        </div>
-        <div class="menu-item" role="menuitem" aria-haspopup="true">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Favorites</div>
-            <div class="menu-item-arrow"></div>
-        </div>
-        <div class="menu-item" role="menuitem" aria-haspopup="true">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Documents</div>
-            <div class="menu-item-arrow"></div>
-        </div>
-        <div class="menu-item" role="menuitem" aria-haspopup="true">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Settings</div>
-            <div class="menu-item-arrow"></div>
-        </div>
-        <div class="menu-item" role="menuitem" aria-haspopup="true">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Find</div>
-            <div class="menu-item-arrow"></div>
-        </div>
-        <div class="menu-item" role="menuitem">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Help</div>
-        </div>
-        <div class="menu-item" role="menuitem">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Run...</div>
-        </div>
-        <div class="separator" role="separator"></div>
-        <div class="menu-item" role="menuitem">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Log Off...</div>
-        </div>
-        <div class="menu-item" role="menuitem">
-            <div class="menu-item-icon"></div>
-            <div class="menu-item-text">Shut Down...</div>
-        </div>
+        <win98-menu-item label="Windows Update" large></win98-menu-item>
+        <win98-menu-separator></win98-menu-separator>
+        <win98-menu-item label="Programs" large>
+            <div slot="submenu">
+                <win98-menu-item label="Accessories">
+                    <div slot="submenu">
+                        <win98-menu-item label="Calculator"></win98-menu-item>
+                        <win98-menu-item label="Notepad"></win98-menu-item>
+                    </div>
+                </win98-menu-item>
+                <win98-menu-item label="MS-DOS Prompt"></win98-menu-item>
+            </div>
+        </win98-menu-item>
+        <win98-menu-item label="Favorites" large></win98-menu-item>
+        <win98-menu-item label="Documents" large></win98-menu-item>
+        <win98-menu-item label="Settings" large></win98-menu-item>
+        <win98-menu-item label="Find" large></win98-menu-item>
+        <win98-menu-item label="Help" large></win98-menu-item>
+        <win98-menu-item label="Run..." large></win98-menu-item>
+        <win98-menu-separator></win98-menu-separator>
+        <win98-menu-item label="Log Off..." large></win98-menu-item>
+        <win98-menu-item label="Shut Down..." large></win98-menu-item>
       </win98-start-menu>
   `;
   stage.appendChild(div);

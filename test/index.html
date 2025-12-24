@@ -88,53 +88,28 @@
         </win98-window>
 
         <win98-taskbar slot="taskbar">
-            <div slot="start-menu" class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Windows Update</div>
-            </div>
-            <div slot="start-menu" class="separator" role="separator"></div>
-            <div slot="start-menu" class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Programs</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div slot="start-menu" class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Favorites</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div slot="start-menu" class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Documents</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div slot="start-menu" class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Settings</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div slot="start-menu" class="menu-item" role="menuitem" aria-haspopup="true">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Find</div>
-                <div class="menu-item-arrow"></div>
-            </div>
-            <div slot="start-menu" class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Help</div>
-            </div>
-            <div slot="start-menu" class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Run...</div>
-            </div>
-            <div slot="start-menu" class="separator" role="separator"></div>
-            <div slot="start-menu" class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Log Off...</div>
-            </div>
-            <div slot="start-menu" class="menu-item" role="menuitem">
-                <div class="menu-item-icon"></div>
-                <div class="menu-item-text">Shut Down...</div>
-            </div>
+            <win98-menu-item slot="start-menu" label="Windows Update" large></win98-menu-item>
+            <win98-menu-separator slot="start-menu"></win98-menu-separator>
+            <win98-menu-item slot="start-menu" label="Programs" large>
+                <div slot="submenu">
+                    <win98-menu-item label="Accessories">
+                        <div slot="submenu">
+                            <win98-menu-item label="Calculator"></win98-menu-item>
+                            <win98-menu-item label="Notepad"></win98-menu-item>
+                        </div>
+                    </win98-menu-item>
+                    <win98-menu-item label="MS-DOS Prompt"></win98-menu-item>
+                </div>
+            </win98-menu-item>
+            <win98-menu-item slot="start-menu" label="Favorites" large></win98-menu-item>
+            <win98-menu-item slot="start-menu" label="Documents" large></win98-menu-item>
+            <win98-menu-item slot="start-menu" label="Settings" large></win98-menu-item>
+            <win98-menu-item slot="start-menu" label="Find" large></win98-menu-item>
+            <win98-menu-item slot="start-menu" label="Help" large></win98-menu-item>
+            <win98-menu-item slot="start-menu" label="Run..." large></win98-menu-item>
+            <win98-menu-separator slot="start-menu"></win98-menu-separator>
+            <win98-menu-item slot="start-menu" label="Log Off..." large></win98-menu-item>
+            <win98-menu-item slot="start-menu" label="Shut Down..." large></win98-menu-item>
         </win98-taskbar>
     </win98-desktop>
 

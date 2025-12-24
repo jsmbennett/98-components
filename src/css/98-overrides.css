@@ -23,14 +23,22 @@ html {
 html,
 body,
 select,
-button,
+win98-select,
+win98-button,
+win98-window,
+win98-menu-item,
 div,
 option {
-    cursor: url('../resources/cursors/default.png') 11 11, auto !important;
+    cursor: url('../resources/cursors/default.png') 11 11, default !important;
 }
 
-a {
-    cursor: url('../resources/cursors/pointer.png') 11 11, auto !important;
+button {
+    cursor: url('../resources/cursors/default.png') 11 11, pointer !important;
+}
+
+a,
+win98-menu-item:hover {
+    cursor: url('../resources/cursors/pointer.png') 11 11, pointer !important;
 }
 
 .resize-handle-nw,

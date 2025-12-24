@@ -1,4 +1,4 @@
-import win98Styles from '98.css?inline';
+import win98Styles from '../css/98-overrides.css?inline';
 
 class Win98Button extends HTMLElement {
   constructor() {
@@ -32,9 +32,6 @@ class Win98Button extends HTMLElement {
       <style>
         :host {
           display: inline-block;
-        }
-        button:disabled {
-          cursor: default;
         }
       </style>
       <button class="${isDefault ? 'default' : ''}" ${isDisabled ? 'disabled' : ''}>

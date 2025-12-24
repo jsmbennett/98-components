@@ -1,4 +1,4 @@
-import win98Styles from '98.css?inline';
+import win98Styles from '../css/98-overrides.css?inline';
 
 class Win98Select extends HTMLElement {
     static get formAssociated() {

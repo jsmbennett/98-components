@@ -325,23 +325,23 @@ class N extends HTMLElement {
         const T = document.createElement("div");
         T.style.position = "fixed", T.style.width = `${U.width - 4}px`, T.style.height = `${U.height - 4}px`, T.style.left = `${U.left}px`, T.style.top = `${U.top}px`, T.style.border = "2px solid white", T.style.mixBlendMode = "difference", T.style.zIndex = "99999", T.style.pointerEvents = "none", document.body.appendChild(T);
         const i = (h) => {
-          const w = h.clientX - x, e = h.clientY - B;
+          const e = h.clientX - x, w = h.clientY - B;
           let y = I, j = z, t = Q, o = S;
-          G.resizeX === -1 ? (y = Math.max(100, I - w), t = Q + (I - y)) : G.resizeX === 1 && (y = Math.max(100, I + w)), G.resizeY === -1 ? (j = Math.max(100, z - e), o = S + (z - j)) : G.resizeY === 1 && (j = Math.max(100, z + e)), T.style.width = `${y - 4}px`, T.style.height = `${j - 4}px`, T.style.left = `${t}px`, T.style.top = `${o}px`;
+          G.resizeX === -1 ? (y = Math.max(100, I - e), t = Q + (I - y)) : G.resizeX === 1 && (y = Math.max(100, I + e)), G.resizeY === -1 ? (j = Math.max(100, z - w), o = S + (z - j)) : G.resizeY === 1 && (j = Math.max(100, z + w)), T.style.width = `${y - 4}px`, T.style.height = `${j - 4}px`, T.style.left = `${t}px`, T.style.top = `${o}px`;
         }, n = (h) => {
           document.removeEventListener("mousemove", i), document.removeEventListener("mouseup", n);
-          const w = h.clientX - x, e = h.clientY - B;
+          const e = h.clientX - x, w = h.clientY - B;
           let y = I, j = z;
           if (G.resizeX === -1) {
-            y = Math.max(100, I - w);
+            y = Math.max(100, I - e);
             const t = I - y;
             this.style.left = `${Q + t}px`;
-          } else G.resizeX === 1 && (y = Math.max(100, I + w));
+          } else G.resizeX === 1 && (y = Math.max(100, I + e));
           if (G.resizeY === -1) {
-            j = Math.max(100, z - e);
+            j = Math.max(100, z - w);
             const t = z - j;
             this.style.top = `${S + t}px`;
-          } else G.resizeY === 1 && (j = Math.max(100, z + e));
+          } else G.resizeY === 1 && (j = Math.max(100, z + w));
           this.style.width = `${y}px`, this.style.height = `${j}px`, document.body.removeChild(g), document.body.removeChild(T);
         };
         document.addEventListener("mousemove", i), document.addEventListener("mouseup", n);
@@ -1191,14 +1191,24 @@ class r extends HTMLElement {
       }
     `;
   }
+  get icon() {
+    return this._icon || this.getAttribute("icon");
+  }
+  set icon(A) {
+    this._icon = A, this.render();
+  }
   render() {
-    const A = this.getAttribute("label") || "", M = this.getAttribute("icon") || "", Z = new CSSStyleSheet();
-    Z.replaceSync(V);
-    const G = new CSSStyleSheet();
-    G.replaceSync(r.componentStyles), this.shadowRoot.adoptedStyleSheets = [Z, G], this.shadowRoot.innerHTML = `
+    const A = this.getAttribute("label") || "", M = this.hasAttribute("large");
+    let Z = "";
+    const G = this.icon;
+    typeof G == "string" ? Z = G : G && typeof G.get == "function" && (Z = G.get(M ? "large" : "small"));
+    const k = new CSSStyleSheet();
+    k.replaceSync(V);
+    const E = new CSSStyleSheet();
+    E.replaceSync(r.componentStyles), this.shadowRoot.adoptedStyleSheets = [k, E], this.shadowRoot.innerHTML = `
       <div class="menu-item" role="menuitem">
         <div class="menu-item-icon">
-          ${M ? `<img src="${M}" alt="">` : ""}
+          ${Z ? `<img src="${Z}" alt="">` : ""}
           <slot name="icon"></slot>
         </div>
         <div class="menu-item-text">

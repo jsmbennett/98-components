@@ -154,9 +154,26 @@ class Win98MenuItem extends HTMLElement {
     `;
   }
 
+  get icon() {
+    return this._icon || this.getAttribute('icon');
+  }
+
+  set icon(value) {
+    this._icon = value;
+    this.render();
+  }
+
   render() {
     const label = this.getAttribute('label') || '';
-    const icon = this.getAttribute('icon') || '';
+    const isLarge = this.hasAttribute('large');
+    let iconSrc = '';
+    const iconValue = this.icon;
+
+    if (typeof iconValue === 'string') {
+      iconSrc = iconValue;
+    } else if (iconValue && typeof iconValue.get === 'function') {
+      iconSrc = iconValue.get(isLarge ? 'large' : 'small');
+    }
 
     const win98Sheet = new CSSStyleSheet();
     win98Sheet.replaceSync(win98Styles);
@@ -169,7 +186,7 @@ class Win98MenuItem extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <div class="menu-item" role="menuitem">
         <div class="menu-item-icon">
-          ${icon ? `<img src="${icon}" alt="">` : ''}
+          ${iconSrc ? `<img src="${iconSrc}" alt="">` : ''}
           <slot name="icon"></slot>
         </div>
         <div class="menu-item-text">

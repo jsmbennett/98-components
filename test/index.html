@@ -88,28 +88,28 @@
         </win98-window>
 
         <win98-taskbar slot="taskbar">
-            <win98-menu-item slot="start-menu" label="Windows Update" large></win98-menu-item>
+            <win98-menu-item id="start-menu-update" slot="start-menu" label="Windows Update" large></win98-menu-item>
             <win98-menu-separator slot="start-menu"></win98-menu-separator>
-            <win98-menu-item slot="start-menu" label="Programs" large>
+            <win98-menu-item id="start-menu-programs" slot="start-menu" label="Programs" large>
                 <div slot="submenu">
-                    <win98-menu-item label="Accessories">
+                    <win98-menu-item id="start-menu-accessories" label="Accessories">
                         <div slot="submenu">
-                            <win98-menu-item label="Calculator"></win98-menu-item>
-                            <win98-menu-item label="Notepad"></win98-menu-item>
+                            <win98-menu-item id="start-menu-calculator" label="Calculator"></win98-menu-item>
+                            <win98-menu-item id="start-menu-notepad" label="Notepad"></win98-menu-item>
                         </div>
                     </win98-menu-item>
-                    <win98-menu-item label="MS-DOS Prompt"></win98-menu-item>
+                    <win98-menu-item id="start-menu-msdos" label="MS-DOS Prompt"></win98-menu-item>
                 </div>
             </win98-menu-item>
-            <win98-menu-item slot="start-menu" label="Favorites" large></win98-menu-item>
-            <win98-menu-item slot="start-menu" label="Documents" large></win98-menu-item>
-            <win98-menu-item slot="start-menu" label="Settings" large></win98-menu-item>
-            <win98-menu-item slot="start-menu" label="Find" large></win98-menu-item>
-            <win98-menu-item slot="start-menu" label="Help" large></win98-menu-item>
-            <win98-menu-item slot="start-menu" label="Run..." large></win98-menu-item>
+            <win98-menu-item id="start-menu-favorites" slot="start-menu" label="Favorites" large></win98-menu-item>
+            <win98-menu-item id="start-menu-documents" slot="start-menu" label="Documents" large></win98-menu-item>
+            <win98-menu-item id="start-menu-settings" slot="start-menu" label="Settings" large></win98-menu-item>
+            <win98-menu-item id="start-menu-find" slot="start-menu" label="Find" large></win98-menu-item>
+            <win98-menu-item id="start-menu-help" slot="start-menu" label="Help" large></win98-menu-item>
+            <win98-menu-item id="start-menu-run" slot="start-menu" label="Run..." large></win98-menu-item>
             <win98-menu-separator slot="start-menu"></win98-menu-separator>
-            <win98-menu-item slot="start-menu" label="Log Off..." large></win98-menu-item>
-            <win98-menu-item slot="start-menu" label="Shut Down..." large></win98-menu-item>
+            <win98-menu-item id="start-menu-logoff" slot="start-menu" label="Log Off..." large></win98-menu-item>
+            <win98-menu-item id="start-menu-shutdown" slot="start-menu" label="Shut Down..." large></win98-menu-item>
         </win98-taskbar>
     </win98-desktop>
 

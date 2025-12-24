@@ -1,6 +1,45 @@
 import '../src/index.js';
 import { windowManager } from '../src/services/WindowManager.js';
 
+// Import icons
+import windowsUpdateLarge from '../src/gen/icons/windowsUpdateLarge.js';
+import directoryClosed from '../src/gen/icons/directoryClosed.js';
+import directoryFavorites from '../src/gen/icons/directoryFavorites.js';
+import directoryMydocs from '../src/gen/icons/directoryMydocs.js';
+import settingsGear from '../src/gen/icons/settingsGear.js';
+import magnifyingGlass from '../src/gen/icons/magnifyingGlass.js';
+import helpQuestionMark from '../src/gen/icons/helpQuestionMark.js';
+import executableScript from '../src/gen/icons/executableScript.js';
+import shutDownNormal from '../src/gen/icons/shutDownNormal.js';
+import calculator from '../src/gen/icons/calculator.js';
+import notepad from '../src/gen/icons/notepad.js';
+import msDos2 from '../src/gen/icons/msDos2.js';
+
+function setupStartMenuIcons() {
+  const iconMap = {
+    'start-menu-update': windowsUpdateLarge,
+    'start-menu-programs': directoryClosed,
+    'start-menu-favorites': directoryFavorites,
+    'start-menu-documents': directoryMydocs,
+    'start-menu-settings': settingsGear,
+    'start-menu-find': magnifyingGlass,
+    'start-menu-help': helpQuestionMark,
+    'start-menu-run': executableScript,
+    'start-menu-shutdown': shutDownNormal,
+    'start-menu-calculator': calculator,
+    'start-menu-notepad': notepad,
+    'start-menu-msdos': msDos2,
+  };
+
+  Object.entries(iconMap).forEach(([id, icon]) => {
+    const el = document.getElementById(id);
+    if (el) el.icon = icon;
+  });
+}
+
+// Initialize taskbar icons
+setupStartMenuIcons();
+
 const stage = document.getElementById('example-stage');
 const desktop = document.querySelector('win98-desktop');
 
@@ -239,30 +278,52 @@ document.getElementById('nav-start-menu')?.addEventListener('click', (e) => {
   div.innerHTML = `
       <p>The Start Menu component with slotted content.</p>
       <win98-start-menu visible style="position: absolute; top: 50px; left: 20px; z-index: auto;">
-        <win98-menu-item label="Windows Update" large></win98-menu-item>
+        <win98-menu-item id="ex-start-update" label="Windows Update" large></win98-menu-item>
         <win98-menu-separator></win98-menu-separator>
-        <win98-menu-item label="Programs" large>
+        <win98-menu-item id="ex-start-programs" label="Programs" large>
             <div slot="submenu">
-                <win98-menu-item label="Accessories">
+                <win98-menu-item id="ex-start-accessories" label="Accessories">
                     <div slot="submenu">
-                        <win98-menu-item label="Calculator"></win98-menu-item>
-                        <win98-menu-item label="Notepad"></win98-menu-item>
+                        <win98-menu-item id="ex-start-calculator" label="Calculator"></win98-menu-item>
+                        <win98-menu-item id="ex-start-notepad" label="Notepad"></win98-menu-item>
                     </div>
                 </win98-menu-item>
-                <win98-menu-item label="MS-DOS Prompt"></win98-menu-item>
+                <win98-menu-item id="ex-start-msdos" label="MS-DOS Prompt"></win98-menu-item>
             </div>
         </win98-menu-item>
-        <win98-menu-item label="Favorites" large></win98-menu-item>
-        <win98-menu-item label="Documents" large></win98-menu-item>
-        <win98-menu-item label="Settings" large></win98-menu-item>
-        <win98-menu-item label="Find" large></win98-menu-item>
-        <win98-menu-item label="Help" large></win98-menu-item>
-        <win98-menu-item label="Run..." large></win98-menu-item>
+        <win98-menu-item id="ex-start-favorites" label="Favorites" large></win98-menu-item>
+        <win98-menu-item id="ex-start-documents" label="Documents" large></win98-menu-item>
+        <win98-menu-item id="ex-start-settings" label="Settings" large></win98-menu-item>
+        <win98-menu-item id="ex-start-find" label="Find" large></win98-menu-item>
+        <win98-menu-item id="ex-start-help" label="Help" large></win98-menu-item>
+        <win98-menu-item id="ex-start-run" label="Run..." large></win98-menu-item>
         <win98-menu-separator></win98-menu-separator>
-        <win98-menu-item label="Log Off..." large></win98-menu-item>
-        <win98-menu-item label="Shut Down..." large></win98-menu-item>
+        <win98-menu-item id="ex-start-logoff" label="Log Off..." large></win98-menu-item>
+        <win98-menu-item id="ex-start-shutdown" label="Shut Down..." large></win98-menu-item>
       </win98-start-menu>
   `;
+
+  // Assign icons
+  const iconMap = {
+    '#ex-start-update': windowsUpdateSmall,
+    '#ex-start-programs': directoryClosed,
+    '#ex-start-favorites': directoryFavorites,
+    '#ex-start-documents': directoryOpenFileMydocs,
+    '#ex-start-settings': settingsGear,
+    '#ex-start-find': magnifyingGlass,
+    '#ex-start-help': helpQuestionMark,
+    '#ex-start-run': executableScript,
+    '#ex-start-shutdown': shutDownNormal,
+    '#ex-start-calculator': calculator,
+    '#ex-start-notepad': notepad,
+    '#ex-start-msdos': msDos2,
+  };
+
+  Object.entries(iconMap).forEach(([selector, icon]) => {
+    const el = div.querySelector(selector);
+    if (el) el.icon = icon;
+  });
+
   stage.appendChild(div);
 });
 

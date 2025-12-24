@@ -586,10 +586,10 @@
       :host(:hover) > .submenu-container.has-items {
         display: block;
       }
-    `}render(){const A=this.getAttribute("label")||"",M=this.getAttribute("icon")||"",Z=new CSSStyleSheet;Z.replaceSync(e);const G=new CSSStyleSheet;G.replaceSync(l.componentStyles),this.shadowRoot.adoptedStyleSheets=[Z,G],this.shadowRoot.innerHTML=`
+    `}get icon(){return this._icon||this.getAttribute("icon")}set icon(A){this._icon=A,this.render()}render(){const A=this.getAttribute("label")||"",M=this.hasAttribute("large");let Z="";const G=this.icon;typeof G=="string"?Z=G:G&&typeof G.get=="function"&&(Z=G.get(M?"large":"small"));const k=new CSSStyleSheet;k.replaceSync(e);const E=new CSSStyleSheet;E.replaceSync(l.componentStyles),this.shadowRoot.adoptedStyleSheets=[k,E],this.shadowRoot.innerHTML=`
       <div class="menu-item" role="menuitem">
         <div class="menu-item-icon">
-          ${M?`<img src="${M}" alt="">`:""}
+          ${Z?`<img src="${Z}" alt="">`:""}
           <slot name="icon"></slot>
         </div>
         <div class="menu-item-text">

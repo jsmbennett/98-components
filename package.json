@@ -14,8 +14,10 @@
         }
     },
     "scripts": {
-        "dev": "vite serve --config vite.test.config.js",
-        "build": "vite build",
+        "dev": "npm run build:icons && vite serve --config vite.test.config.js",
+        "build": "npm run build:icons && vite build",
+        "build:icons": "node scripts/build-icons.js",
+        "clean:icons": "node scripts/build-icons.js --clean",
         "build:test": "vite build --config vite.build-test.config.js",
         "preview": "vite preview"
     },

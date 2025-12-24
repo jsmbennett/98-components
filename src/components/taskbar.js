@@ -1,6 +1,6 @@
 import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
-import windowsLogo from '../resources/icons/windows-logo.png';
+import windowsLogo from '../resources/icons/misc/windows-logo-start-16x16.png';
 import Win98StartMenu from './startmenu.js';
 
 /**

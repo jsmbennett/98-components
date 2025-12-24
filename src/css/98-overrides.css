@@ -26,31 +26,31 @@ select,
 button,
 div,
 option {
-    cursor: url('../resources/icons/default.png') 11 11, auto !important;
+    cursor: url('../resources/icons/cursors/default.png') 11 11, auto !important;
 }
 
 a {
-    cursor: url('../resources/icons/pointer.png') 11 11, auto !important;
+    cursor: url('../resources/icons/cursors/pointer.png') 11 11, auto !important;
 }
 
 .resize-handle-nw,
 .resize-handle-se {
-    cursor: url('../resources/icons/resize-fs.png') 2 2, nwse-resize !important;
+    cursor: url('../resources/icons/cursors/resize-fs.png') 2 2, nwse-resize !important;
 }
 
 .resize-handle-ne,
 .resize-handle-sw {
-    cursor: url('../resources/icons/resize-bs.png') 2 2, nesw-resize !important;
+    cursor: url('../resources/icons/cursors/resize-bs.png') 2 2, nesw-resize !important;
 }
 
 .resize-handle-n,
 .resize-handle-s {
-    cursor: url('../resources/icons/resize-ud.png') 2 2, ns-resize !important;
+    cursor: url('../resources/icons/cursors/resize-ud.png') 2 2, ns-resize !important;
 }
 
 .resize-handle-w,
 .resize-handle-e {
-    cursor: url('../resources/icons/resize-lr.png') 2 2, ew-resize !important;
+    cursor: url('../resources/icons/cursors/resize-lr.png') 2 2, ew-resize !important;
 }
 
 ::selection {

@@ -1,9 +1,9 @@
 import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
-import resizeFsCursor from '../resources/icons/resize-fs.png';
-import resizeBsCursor from '../resources/icons/resize-bs.png';
-import resizeUdCursor from '../resources/icons/resize-ud.png';
-import resizeLrCursor from '../resources/icons/resize-lr.png';
+import resizeFsCursor from '../resources/icons/cursors/resize-fs.png';
+import resizeBsCursor from '../resources/icons/cursors/resize-bs.png';
+import resizeUdCursor from '../resources/icons/cursors/resize-ud.png';
+import resizeLrCursor from '../resources/icons/cursors/resize-lr.png';
 
 class Win98Window extends HTMLElement {
   constructor() {

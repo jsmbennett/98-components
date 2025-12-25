@@ -14,11 +14,11 @@
         }
     },
     "scripts": {
-        "dev": "npm run build:icons && vite serve --config vite.test.config.js",
-        "build": "npm run build:icons && vite build",
+        "dev": "pnpm run build:icons && vite serve --config vite.test.config.js",
+        "build": "pnpm run build:icons && vite build",
         "build:icons": "node scripts/build-icons.js",
         "clean:icons": "node scripts/build-icons.js --clean",
-        "build:test": "npm run build:icons && vite build --config vite.build-test.config.js",
+        "build:test": "pnpm run build:icons && vite build --config vite.build-test.config.js",
         "preview": "vite preview"
     },
     "dependencies": {

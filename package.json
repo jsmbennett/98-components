@@ -19,12 +19,14 @@
         "build:icons": "node scripts/build-icons.js",
         "clean:icons": "node scripts/build-icons.js --clean",
         "build:test": "pnpm run build:icons && vite build --config vite.build-test.config.js",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "docs": "jsdoc -c jsdoc.json"
     },
     "dependencies": {
         "98.css": "^0.1.20"
     },
     "devDependencies": {
+        "jsdoc": "^4.0.5",
         "vite": "^5.0.0"
     },
     "packageManager": "pnpm@10.24.0"

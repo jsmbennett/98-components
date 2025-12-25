@@ -23,3 +23,5 @@ Thumbs.db
 # Generated files
 src/gen/
 dist-test/
+dist/
+docs/

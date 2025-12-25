@@ -2,14 +2,38 @@ import win98Styles from '98.css?inline';
 import { windowManager } from '../services/WindowManager.js';
 
 /**
- * Win98Desktop - The root container component
+ * @typedef {Object} WindowOptions
+ * @property {string} [title="Window"] - The text displayed in the title bar.
+ * @property {string|null} [icon=null] - The icon to display in the title bar and taskbar.
+ * @property {boolean} [resizable=false] - Whether the window can be resized by the user.
+ * @property {boolean} [showHelp=false] - Whether to show the help button in the title bar.
+ * @property {boolean} [statusBar=false] - Whether to show a status bar at the bottom.
+ * @property {boolean} [showMinimize=true] - Whether to show the minimize button.
+ * @property {boolean} [showMaximize=true] - Whether to show the maximize button.
+ * @property {number} [x] - Initial X coordinate in pixels.
+ * @property {number} [y] - Initial Y coordinate in pixels.
+ * @property {number} [width] - Initial width in pixels.
+ * @property {number} [height] - Initial height in pixels.
+ * @property {string|HTMLElement} [content] - The HTML string or element to place inside the window.
+ */
+
+/**
+ * Win98Desktop - The root container component.
  * 
  * This component acts as the "viewport" or "screen" for the Windows 98 environment.
- * It provides:
- * - A relative positioning context for absolute-positioned windows
- * - A taskbar at the bottom
- * - Global window event coordination
- * - Z-index stacking management
+ * It manages window placement, z-index stacking via the WindowManager, and provides 
+ * a taskbar area.
+ * 
+ * @element win98-desktop
+ * 
+ * @slot - The default slot for `<win98-window>` elements.
+ * @slot taskbar - The slot for the `<win98-taskbar>` component.
+ * 
+ * @cssprop [--desktop-background=#008080] - The background color of the desktop.
+ * 
+ * @listens window-focus - Focuses the window when it requests focus.
+ * @listens window-close - Unregisters the window when it is closed.
+ * @listens window-minimize - Minimizes the window when requested.
  */
 class Win98Desktop extends HTMLElement {
     constructor() {
@@ -143,9 +167,10 @@ class Win98Desktop extends HTMLElement {
     }
 
     /**
-     * Programmatically create and add a window
-     * @param {Object} options - Window configuration
-     * @returns {HTMLElement} The created window element
+     * Programmatically create and add a window to the desktop.
+     * 
+     * @param {WindowOptions} options - Configuration for the new window.
+     * @returns {HTMLElement} The created `<win98-window>` element.
      */
     createWindow(options = {}) {
         const window = document.createElement('win98-window');
@@ -194,57 +219,6 @@ class Win98Desktop extends HTMLElement {
         return windowManager.getAllWindows();
     }
 
-    /**
-     * Cascade all windows (arrange in a staggered pattern)
-     * @param {Object} options - Cascade options
-     */
-    cascadeWindows(options = {}) {
-        const {
-            startX = 50,
-            startY = 50,
-            offsetX = 30,
-            offsetY = 30,
-            width = 400,
-            height = 300
-        } = options;
-
-        const windows = windowManager.getAllWindows();
-        windows.forEach((win, index) => {
-            win.element.style.left = `${startX + (index * offsetX)}px`;
-            win.element.style.top = `${startY + (index * offsetY)}px`;
-            win.element.style.width = `${width}px`;
-            win.element.style.height = `${height}px`;
-        });
-    }
-
-    /**
-     * Tile all windows (arrange in a grid)
-     * @param {Object} options - Tile options
-     */
-    tileWindows(options = {}) {
-        const windows = windowManager.getAllWindows();
-        if (windows.length === 0) return;
-
-        const { padding = 10 } = options;
-        const desktopRect = this.getBoundingClientRect();
-        const availableHeight = desktopRect.height - 28; // Subtract taskbar height
-
-        const cols = Math.ceil(Math.sqrt(windows.length));
-        const rows = Math.ceil(windows.length / cols);
-
-        const windowWidth = (desktopRect.width - (padding * (cols + 1))) / cols;
-        const windowHeight = (availableHeight - (padding * (rows + 1))) / rows;
-
-        windows.forEach((win, index) => {
-            const col = index % cols;
-            const row = Math.floor(index / cols);
-
-            win.element.style.left = `${padding + (col * (windowWidth + padding))}px`;
-            win.element.style.top = `${padding + (row * (windowHeight + padding))}px`;
-            win.element.style.width = `${windowWidth}px`;
-            win.element.style.height = `${windowHeight}px`;
-        });
-    }
 }
 
 customElements.define('win98-desktop', Win98Desktop);

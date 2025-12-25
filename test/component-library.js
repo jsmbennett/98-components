@@ -423,15 +423,6 @@ function launchDesktopDemo() {
     windowCounter++;
   });
 
-  const cascadeBtn = controlPanel.querySelector('#cascade-btn');
-  cascadeBtn?.addEventListener('click', () => {
-    desktop.cascadeWindows();
-  });
-
-  const tileBtn = controlPanel.querySelector('#tile-btn');
-  tileBtn?.addEventListener('click', () => {
-    desktop.tileWindows();
-  });
 
   // Update window count
   const windowCountSpan = controlPanel.querySelector('#window-count');

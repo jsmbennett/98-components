@@ -187,58 +187,33 @@ class Win98Window extends HTMLElement {
     const helpBtn = this.shadowRoot.querySelector('[aria-label="Help"]');
 
     // Focus window when clicked anywhere
-    this.addEventListener('mousedown', (e) => {
+    this.addEventListener('mousedown', () => {
       this.dispatchEvent(new CustomEvent('window-focus', {
         bubbles: true,
         composed: true
       }));
     });
 
-    // Drag and Drop (Mouse Events for XOR Visual)
-    // We cannot use native Drag & Drop API because setDragImage doesn't support mix-blend-mode
-
+    // Drag and Drop
     if (!this.hasAttribute('no-drag')) {
       titleBar.addEventListener('mousedown', (e) => {
-        // Prevent dragging if clicking buttons
         if (e.target.tagName === 'BUTTON') return;
-
         e.preventDefault();
 
         const rect = this.getBoundingClientRect();
         const offsetX = e.clientX - rect.left;
         const offsetY = e.clientY - rect.top;
 
-        // Create ghost outline with XOR effect
-        const ghost = document.createElement('div');
-        ghost.style.position = 'fixed';
-        ghost.style.width = `${rect.width + 2}px`; // Adjust for border width
-        ghost.style.height = `${rect.height + 2}px`;
-        ghost.style.left = `${rect.left}px`;
-        ghost.style.top = `${rect.top}px`;
-        ghost.style.border = '2px solid white';
-        ghost.style.mixBlendMode = 'difference';
-        ghost.style.zIndex = '99999';
-        ghost.style.pointerEvents = 'none';
-        document.body.appendChild(ghost);
-
-        const moveHandler = (moveEvent) => {
-          ghost.style.left = `${moveEvent.clientX - offsetX}px`;
-          ghost.style.top = `${moveEvent.clientY - offsetY}px`;
-        };
-
-        const upHandler = (upEvent) => {
-          document.removeEventListener('mousemove', moveHandler);
-          document.removeEventListener('mouseup', upHandler);
-
-          // Commit position
-          this.style.left = `${upEvent.clientX - offsetX}px`;
-          this.style.top = `${upEvent.clientY - offsetY}px`;
-
-          document.body.removeChild(ghost);
-        };
-
-        document.addEventListener('mousemove', moveHandler);
-        document.addEventListener('mouseup', upHandler);
+        this._startInteraction(e, {
+          onMove: (me, ghost) => {
+            ghost.style.left = `${me.clientX - offsetX}px`;
+            ghost.style.top = `${me.clientY - offsetY}px`;
+          },
+          onEnd: (ue) => {
+            this.style.left = `${ue.clientX - offsetX}px`;
+            this.style.top = `${ue.clientY - offsetY}px`;
+          }
+        });
       });
     }
 
@@ -252,7 +227,6 @@ class Win98Window extends HTMLElement {
     if (maximizeBtn) {
       maximizeBtn.addEventListener('click', () => {
         this.dispatchEvent(new CustomEvent('window-maximize', { bubbles: true, composed: true }));
-        // Simple maximize behavior: toggle full screen within parent
         if (this.style.width === '100%' && this.style.height === '100%') {
           this.style.width = this.dataset.prevWidth || '';
           this.style.height = this.dataset.prevHeight || '';
@@ -291,13 +265,9 @@ class Win98Window extends HTMLElement {
   }
 
   setupResize() {
-    const minWidth = 100;
-    const minHeight = 100;
-
-    // Define resize configurations for each handle
     const resizeConfigs = [
       { selector: '.resize-handle-nw', cursor: resizeFsCursor, fallback: 'nwse-resize', resizeX: -1, resizeY: -1 },
-      { selector: '.resize-handle-n', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 10, resizeY: 5 },
+      { selector: '.resize-handle-n', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 0, resizeY: -1 },
       { selector: '.resize-handle-ne', cursor: resizeBsCursor, fallback: 'nesw-resize', resizeX: 1, resizeY: -1 },
       { selector: '.resize-handle-w', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: -1, resizeY: 0 },
       { selector: '.resize-handle-e', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: 1, resizeY: 0 },
@@ -314,109 +284,108 @@ class Win98Window extends HTMLElement {
         e.preventDefault();
         e.stopPropagation();
 
-        const rect = this.getBoundingClientRect();
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startWidth = parseInt(getComputedStyle(this).width, 10);
-        const startHeight = parseInt(getComputedStyle(this).height, 10);
-        const startLeft = rect.left;
-        const startTop = rect.top;
-
-        // Create cursor overlay to maintain resize cursor
-        const cursorOverlay = document.createElement('div');
-        cursorOverlay.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 99998;
-          cursor: url(${config.cursor}) 2 2, ${config.fallback} !important;
-        `;
-        document.body.appendChild(cursorOverlay);
-
-        // Create ghost outline with XOR effect
-        const ghost = document.createElement('div');
-        ghost.style.position = 'fixed';
-        ghost.style.width = `${rect.width + 2}px`;
-        ghost.style.height = `${rect.height + 2}px`;
-        ghost.style.left = `${rect.left}px`;
-        ghost.style.top = `${rect.top}px`;
-        ghost.style.border = '2px solid white';
-        ghost.style.mixBlendMode = 'difference';
-        ghost.style.zIndex = '99999';
-        ghost.style.pointerEvents = 'none';
-        document.body.appendChild(ghost);
-
-        const mouseMoveHandler = (e) => {
-          const deltaX = e.clientX - startX;
-          const deltaY = e.clientY - startY;
-
-          let newWidth = startWidth;
-          let newHeight = startHeight;
-          let newLeft = startLeft;
-          let newTop = startTop;
-
-          // Calculate new dimensions based on resize direction
-          if (config.resizeX === -1) {
-            newWidth = Math.max(minWidth, startWidth - deltaX);
-            newLeft = startLeft + (startWidth - newWidth);
-          } else if (config.resizeX === 1) {
-            newWidth = Math.max(minWidth, startWidth + deltaX);
+        this._startInteraction(e, {
+          cursor: config.cursor,
+          fallback: config.fallback,
+          onMove: (me, ghost, initialRect) => {
+            const results = this._calculateResize(
+              me.clientX - e.clientX,
+              me.clientY - e.clientY,
+              initialRect.width, initialRect.height, initialRect.left, initialRect.top,
+              config
+            );
+            ghost.style.width = `${results.width}px`;
+            ghost.style.height = `${results.height}px`;
+            ghost.style.left = `${results.left}px`;
+            ghost.style.top = `${results.top}px`;
+          },
+          onEnd: (ue, ghost, initialRect) => {
+            const results = this._calculateResize(
+              ue.clientX - e.clientX,
+              ue.clientY - e.clientY,
+              initialRect.width, initialRect.height, initialRect.left, initialRect.top,
+              config
+            );
+            this.style.width = `${results.width}px`;
+            this.style.height = `${results.height}px`;
+            this.style.left = `${results.left}px`;
+            this.style.top = `${results.top}px`;
           }
-
-          if (config.resizeY === -1) {
-            newHeight = Math.max(minHeight, startHeight - deltaY);
-            newTop = startTop + (startHeight - newHeight);
-          } else if (config.resizeY === 1) {
-            newHeight = Math.max(minHeight, startHeight + deltaY);
-          }
-
-          ghost.style.width = `${newWidth - 4}px`;
-          ghost.style.height = `${newHeight - 4}px`;
-          ghost.style.left = `${newLeft}px`;
-          ghost.style.top = `${newTop}px`;
-        };
-
-        const mouseUpHandler = (e) => {
-          document.removeEventListener('mousemove', mouseMoveHandler);
-          document.removeEventListener('mouseup', mouseUpHandler);
-
-          const deltaX = e.clientX - startX;
-          const deltaY = e.clientY - startY;
-
-          let newWidth = startWidth;
-          let newHeight = startHeight;
-
-          // Calculate final dimensions
-          if (config.resizeX === -1) {
-            newWidth = Math.max(minWidth, startWidth - deltaX);
-            const actualDelta = startWidth - newWidth;
-            this.style.left = `${startLeft + actualDelta}px`;
-          } else if (config.resizeX === 1) {
-            newWidth = Math.max(minWidth, startWidth + deltaX);
-          }
-
-          if (config.resizeY === -1) {
-            newHeight = Math.max(minHeight, startHeight - deltaY);
-            const actualDelta = startHeight - newHeight;
-            this.style.top = `${startTop + actualDelta}px`;
-          } else if (config.resizeY === 1) {
-            newHeight = Math.max(minHeight, startHeight + deltaY);
-          }
-
-          this.style.width = `${newWidth}px`;
-          this.style.height = `${newHeight}px`;
-
-          // Remove overlays
-          document.body.removeChild(cursorOverlay);
-          document.body.removeChild(ghost);
-        };
-
-        document.addEventListener('mousemove', mouseMoveHandler);
-        document.addEventListener('mouseup', mouseUpHandler);
+        });
       });
     });
+  }
+
+  _createGhost(rect) {
+    const ghost = document.createElement('div');
+    ghost.style.cssText = `
+      position: fixed;
+      width: ${rect.width}px;
+      height: ${rect.height}px;
+      left: ${rect.left}px;
+      top: ${rect.top}px;
+      border: 2px solid white;
+      mix-blend-mode: difference;
+      z-index: 99999;
+      pointer-events: none;
+      box-sizing: border-box;
+    `;
+    document.body.appendChild(ghost);
+    return ghost;
+  }
+
+  _startInteraction(e, { onMove, onEnd, cursor, fallback }) {
+    const rect = this.getBoundingClientRect();
+    const ghost = this._createGhost(rect);
+    let overlay = null;
+
+    if (cursor) {
+      overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 99998;
+        cursor: url(${cursor}) 2 2, ${fallback || 'auto'} !important;
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    const mouseMove = (me) => onMove(me, ghost, rect);
+    const mouseUp = (ue) => {
+      document.removeEventListener('mousemove', mouseMove);
+      document.removeEventListener('mouseup', mouseUp);
+      onEnd(ue, ghost, rect);
+      ghost.remove();
+      if (overlay) overlay.remove();
+    };
+
+    document.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', mouseUp);
+  }
+
+  _calculateResize(deltaX, deltaY, startWidth, startHeight, startLeft, startTop, config) {
+    const minWidth = 100;
+    const minHeight = 100;
+    let newWidth = startWidth;
+    let newHeight = startHeight;
+    let newLeft = startLeft;
+    let newTop = startTop;
+
+    if (config.resizeX === -1) {
+      newWidth = Math.max(minWidth, startWidth - deltaX);
+      newLeft = startLeft + (startWidth - newWidth);
+    } else if (config.resizeX === 1) {
+      newWidth = Math.max(minWidth, startWidth + deltaX);
+    }
+
+    if (config.resizeY === -1) {
+      newHeight = Math.max(minHeight, startHeight - deltaY);
+      newTop = startTop + (startHeight - newHeight);
+    } else if (config.resizeY === 1) {
+      newHeight = Math.max(minHeight, startHeight + deltaY);
+    }
+
+    return { width: newWidth, height: newHeight, left: newLeft, top: newTop };
   }
 }
 

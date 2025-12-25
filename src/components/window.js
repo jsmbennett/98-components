@@ -1,20 +1,47 @@
 import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
-import resizeFsCursor from '../resources/cursors/resize-fs.png';
-import resizeBsCursor from '../resources/cursors/resize-bs.png';
-import resizeUdCursor from '../resources/cursors/resize-ud.png';
-import resizeLrCursor from '../resources/cursors/resize-lr.png';
 
+/**
+ * @element win98-window
+ * @description A Windows 98 style window component.
+ * 
+ * @attr {string} title - The title of the window.
+ * @attr {boolean} resizable - Whether the window can be resized.
+ * @attr {boolean} inactive - Whether the window is in an inactive state.
+ * @attr {boolean} show-help - Whether to show the help button in the title bar.
+ * @attr {boolean} status-bar - Whether to show a status bar at the bottom.
+ * @attr {boolean} show-minimize - Whether to show the minimize button.
+ * @attr {boolean} show-maximize - Whether to show the maximize button.
+ * @attr {boolean} no-drag - Whether to disable window dragging.
+ * 
+ * @slot - The main content of the window.
+ * @slot status - Content for the status bar.
+ * 
+ * @fires window-focus - Fired when the window is clicked or focused.
+ * @fires window-minimize - Fired when the minimize button is clicked.
+ * @fires window-maximize - Fired when the maximize button is clicked.
+ * @fires window-close - Fired when the close button is clicked.
+ * @fires window-help - Fired when the help button is clicked.
+ */
 class Win98Window extends HTMLElement {
+  /**
+   * Creates an instance of Win98Window.
+   */
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
   }
 
+  /**
+   * Lifecycle callback: Called when the element is added to the document.
+   */
   connectedCallback() {
     this.render();
   }
 
+  /**
+   * Lifecycle callback: Called when the element is removed from the document.
+   */
   disconnectedCallback() {
     // Unregister from WindowManager when removed
     const windowId = this.dataset.windowId;
@@ -23,10 +50,20 @@ class Win98Window extends HTMLElement {
     }
   }
 
+  /**
+   * List of attributes to observe for changes.
+   * @type {string[]}
+   */
   static get observedAttributes() {
     return ['title', 'resizable', 'inactive', 'show-help', 'status-bar', 'show-minimize', 'show-maximize'];
   }
 
+  /**
+   * Lifecycle callback: Called when an observed attribute changes.
+   * @param {string} name - Name of the attribute.
+   * @param {string} oldValue - Previous value.
+   * @param {string} newValue - New value.
+   */
   attributeChangedCallback(name, oldValue, newValue) {
     if (this.shadowRoot) {
       this.render();
@@ -38,6 +75,10 @@ class Win98Window extends HTMLElement {
     }
   }
 
+  /**
+   * Returns the component-specific CSS styles.
+   * @type {string}
+   */
   static get componentStyles() {
     return `
       :host {
@@ -124,6 +165,10 @@ class Win98Window extends HTMLElement {
     `;
   }
 
+  /**
+   * Returns the HTML template for the window.
+   * @returns {string} The HTML template string.
+   */
   getTemplate() {
     const title = this.getAttribute('title') || 'Window';
     const inactive = this.hasAttribute('inactive');
@@ -161,6 +206,9 @@ class Win98Window extends HTMLElement {
     `;
   }
 
+  /**
+   * Renders the component and sets up styles.
+   */
   render() {
     // Import 98.css styles
     const win98Sheet = new CSSStyleSheet();
@@ -179,6 +227,9 @@ class Win98Window extends HTMLElement {
     this.setupInteractions();
   }
 
+  /**
+   * Sets up event listeners for window interactions like dragging and buttons.
+   */
   setupInteractions() {
     const titleBar = this.shadowRoot.querySelector('.title-bar');
     const minimizeBtn = this.shadowRoot.querySelector('[aria-label="Minimize"]');
@@ -205,6 +256,7 @@ class Win98Window extends HTMLElement {
         const offsetY = e.clientY - rect.top;
 
         this._startInteraction(e, {
+          cursorClass: 'cursor-drag-default',
           onMove: (me, ghost) => {
             ghost.style.left = `${me.clientX - offsetX}px`;
             ghost.style.top = `${me.clientY - offsetY}px`;
@@ -264,16 +316,19 @@ class Win98Window extends HTMLElement {
     }
   }
 
+  /**
+   * Sets up the resize handles and their drag logic.
+   */
   setupResize() {
     const resizeConfigs = [
-      { selector: '.resize-handle-nw', cursor: resizeFsCursor, fallback: 'nwse-resize', resizeX: -1, resizeY: -1 },
-      { selector: '.resize-handle-n', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 0, resizeY: -1 },
-      { selector: '.resize-handle-ne', cursor: resizeBsCursor, fallback: 'nesw-resize', resizeX: 1, resizeY: -1 },
-      { selector: '.resize-handle-w', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: -1, resizeY: 0 },
-      { selector: '.resize-handle-e', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: 1, resizeY: 0 },
-      { selector: '.resize-handle-sw', cursor: resizeBsCursor, fallback: 'nesw-resize', resizeX: -1, resizeY: 1 },
-      { selector: '.resize-handle-s', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 0, resizeY: 1 },
-      { selector: '.resize-handle-se', cursor: resizeFsCursor, fallback: 'nwse-resize', resizeX: 1, resizeY: 1 },
+      { selector: '.resize-handle-nw', cursorClass: 'cursor-drag-nwse', resizeX: -1, resizeY: -1 },
+      { selector: '.resize-handle-n', cursorClass: 'cursor-drag-ns', resizeX: 0, resizeY: -1 },
+      { selector: '.resize-handle-ne', cursorClass: 'cursor-drag-nesw', resizeX: 1, resizeY: -1 },
+      { selector: '.resize-handle-w', cursorClass: 'cursor-drag-ew', resizeX: -1, resizeY: 0 },
+      { selector: '.resize-handle-e', cursorClass: 'cursor-drag-ew', resizeX: 1, resizeY: 0 },
+      { selector: '.resize-handle-sw', cursorClass: 'cursor-drag-nesw', resizeX: -1, resizeY: 1 },
+      { selector: '.resize-handle-s', cursorClass: 'cursor-drag-ns', resizeX: 0, resizeY: 1 },
+      { selector: '.resize-handle-se', cursorClass: 'cursor-drag-nwse', resizeX: 1, resizeY: 1 },
     ];
 
     resizeConfigs.forEach(config => {
@@ -285,8 +340,7 @@ class Win98Window extends HTMLElement {
         e.stopPropagation();
 
         this._startInteraction(e, {
-          cursor: config.cursor,
-          fallback: config.fallback,
+          cursorClass: config.cursorClass,
           onMove: (me, ghost, initialRect) => {
             const results = this._calculateResize(
               me.clientX - e.clientX,
@@ -316,6 +370,12 @@ class Win98Window extends HTMLElement {
     });
   }
 
+  /**
+   * Creates a ghost element for drag/resize visual feedback.
+   * @private
+   * @param {DOMRect} rect - Initial dimensions and position.
+   * @returns {HTMLElement} The created ghost element.
+   */
   _createGhost(rect) {
     const ghost = document.createElement('div');
     ghost.style.cssText = `
@@ -334,18 +394,27 @@ class Win98Window extends HTMLElement {
     return ghost;
   }
 
-  _startInteraction(e, { onMove, onEnd, cursor, fallback }) {
+  /**
+   * Starts a drag or resize interaction.
+   * @private
+   * @param {MouseEvent} e - The initial mousedown event.
+   * @param {Object} options - Interaction options.
+   * @param {Function} options.onMove - Callback for mousemove events.
+   * @param {Function} options.onEnd - Callback for mouseup events.
+   * @param {string} options.cursorClass - CSS class for the cursor overlay.
+   */
+  _startInteraction(e, { onMove, onEnd, cursorClass }) {
     const rect = this.getBoundingClientRect();
     const ghost = this._createGhost(rect);
     let overlay = null;
 
-    if (cursor) {
+    if (cursorClass) {
       overlay = document.createElement('div');
+      overlay.className = cursorClass;
       overlay.style.cssText = `
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
         z-index: 99998;
-        cursor: url(${cursor}) 2 2, ${fallback || 'auto'} !important;
       `;
       document.body.appendChild(overlay);
     }
@@ -363,6 +432,18 @@ class Win98Window extends HTMLElement {
     document.addEventListener('mouseup', mouseUp);
   }
 
+  /**
+   * Calculates new dimensions and position during a resize operation.
+   * @private
+   * @param {number} deltaX - Change in X coordinate.
+   * @param {number} deltaY - Change in Y coordinate.
+   * @param {number} startWidth - Initial width.
+   * @param {number} startHeight - Initial height.
+   * @param {number} startLeft - Initial left position.
+   * @param {number} startTop - Initial top position.
+   * @param {Object} config - Resize configuration for the specific handle.
+   * @returns {Object} New width, height, left, and top values.
+   */
   _calculateResize(deltaX, deltaY, startWidth, startHeight, startLeft, startTop, config) {
     const minWidth = 100;
     const minHeight = 100;

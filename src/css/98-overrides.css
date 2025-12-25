@@ -61,6 +61,27 @@ win98-menu-item:hover {
     cursor: url('../resources/cursors/resize-lr.png') 2 2, ew-resize !important;
 }
 
+/* Cursor Utilities */
+.cursor-drag-nwse {
+    cursor: url('../resources/cursors/resize-fs.png') 7 7, nwse-resize !important;
+}
+
+.cursor-drag-nesw {
+    cursor: url('../resources/cursors/resize-bs.png') 2 2, nesw-resize !important;
+}
+
+.cursor-drag-ns {
+    cursor: url('../resources/cursors/resize-ud.png') 10 5, ns-resize !important;
+}
+
+.cursor-drag-ew {
+    cursor: url('../resources/cursors/resize-lr.png') 2 2, ew-resize !important;
+}
+
+.cursor-drag-default {
+    cursor: url('../resources/cursors/default.png') 11 11, default !important;
+}
+
 ::selection {
     background-color: #000080;
     color: #fff

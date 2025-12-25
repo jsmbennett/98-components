@@ -3,7 +3,7 @@ import { windowManager } from '../services/WindowManager.js';
 
 /**
  * @element win98-window
- * @description A Windows 98 style window component.
+ * @description A Windows 98-style window component
  * 
  * @attr {string} title - The title of the window.
  * @attr {boolean} resizable - Whether the window can be resized.
@@ -24,61 +24,47 @@ import { windowManager } from '../services/WindowManager.js';
  * @fires window-help - Fired when the help button is clicked.
  */
 class Win98Window extends HTMLElement {
-  /**
-   * Creates an instance of Win98Window.
-   */
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this._isInitialized = false;
   }
 
-  /**
-   * Lifecycle callback: Called when the element is added to the document.
-   */
   connectedCallback() {
-    this.render();
+    if (!this._isInitialized) {
+      this.initShadow();
+      this._isInitialized = true;
+    }
   }
 
-  /**
-   * Lifecycle callback: Called when the element is removed from the document.
-   */
   disconnectedCallback() {
-    // Unregister from WindowManager when removed
     const windowId = this.dataset.windowId;
     if (windowId) {
       windowManager.unregister(windowId);
     }
   }
 
-  /**
-   * List of attributes to observe for changes.
-   * @type {string[]}
-   */
   static get observedAttributes() {
     return ['title', 'resizable', 'inactive', 'show-help', 'status-bar', 'show-minimize', 'show-maximize'];
   }
 
-  /**
-   * Lifecycle callback: Called when an observed attribute changes.
-   * @param {string} name - Name of the attribute.
-   * @param {string} oldValue - Previous value.
-   * @param {string} newValue - New value.
-   */
   attributeChangedCallback(name, oldValue, newValue) {
-    if (this.shadowRoot) {
-      this.render();
+    if (!this._isInitialized) return;
 
-      // Update WindowManager if title changes
-      if (name === 'title' && this.dataset.windowId) {
+    if (name === 'title') {
+      const titleEl = this.shadowRoot.querySelector('[data-window-part="title"]');
+      if (titleEl) titleEl.textContent = newValue || 'Window';
+      if (this.dataset.windowId) {
         windowManager.updateWindow(this.dataset.windowId, { title: newValue });
       }
     }
+
+    if (name === 'inactive') {
+      const titleBar = this.shadowRoot.querySelector('.title-bar');
+      if (titleBar) titleBar.classList.toggle('inactive', this.hasAttribute('inactive'));
+    }
   }
 
-  /**
-   * Returns the component-specific CSS styles.
-   * @type {string}
-   */
   static get componentStyles() {
     return `
       :host {
@@ -94,330 +80,182 @@ class Win98Window extends HTMLElement {
       .window-body {
         flex: 1;
       }
+
+      /* Attribute-driven visibility */
+      :host(:not([status-bar])) .status-bar { display: none; }
+      :host(:not([resizable])) .resize-handle { display: none; }
+      
+      /* Logic for which buttons to show */
+      :host([show-help]) [data-window-action="minimize"],
+      :host([show-help]) [data-window-action="maximize"] { display: none; }
+      
+      :host([show-minimize="false"]) [data-window-action="minimize"] { display: none; }
+      :host([show-maximize="false"]) [data-window-action="maximize"] { display: none; }
+      
+      :host(:not([show-help])) [data-window-action="help"] { display: none; }
+
       .resize-handle {
         position: absolute;
         z-index: 10;
       }
-      .resize-handle-nw {
-        top: -2px;
-        left: -2px;
-        width: 6px;
-        height: 6px;
-        cursor: nwse-resize;
-      }
-      .resize-handle-n {
-        top: -2px;
-        left: 6px;
-        right: 6px;
-        height: 4px;
-        cursor: ns-resize;
-      }
-      .resize-handle-ne {
-        top: -2px;
-        right: -2px;
-        width: 6px;
-        height: 6px;
-        cursor: nesw-resize;
-      }
-      .resize-handle-w {
-        top: 6px;
-        left: -2px;
-        bottom: 6px;
-        width: 4px;
-        cursor: ew-resize;
-      }
-      .resize-handle-e {
-        top: 6px;
-        right: -2px;
-        bottom: 6px;
-        width: 4px;
-        cursor: ew-resize;
-      }
-      .resize-handle-sw {
-        bottom: -2px;
-        left: -2px;
-        width: 6px;
-        height: 6px;
-        cursor: nesw-resize;
-      }
-      .resize-handle-s {
-        bottom: -2px;
-        left: 6px;
-        right: 6px;
-        height: 4px;
-        cursor: ns-resize;
-      }
-      .resize-handle-se {
-        bottom: -2px;
-        right: -2px;
-        width: 6px;
-        height: 6px;
-        cursor: nwse-resize;
-      }
-      .maximize-animation {
-        position: fixed;
-        background: linear-gradient(to right, #000080, #1084d0);
-        border: 2px solid white;
-        mix-blend-mode: difference;
-        z-index: 99999;
-        pointer-events: none;
-      }
+      .resize-handle-nw { top: -2px; left: -2px; width: 6px; height: 6px; cursor: nwse-resize; }
+      .resize-handle-n { top: -2px; left: 6px; right: 6px; height: 4px; cursor: ns-resize; }
+      .resize-handle-ne { top: -2px; right: -2px; width: 6px; height: 6px; cursor: nesw-resize; }
+      .resize-handle-w { top: 6px; left: -2px; bottom: 6px; width: 4px; cursor: ew-resize; }
+      .resize-handle-e { top: 6px; right: -2px; bottom: 6px; width: 4px; cursor: ew-resize; }
+      .resize-handle-sw { bottom: -2px; left: -2px; width: 6px; height: 6px; cursor: nesw-resize; }
+      .resize-handle-s { bottom: -2px; left: 6px; right: 6px; height: 4px; cursor: ns-resize; }
+      .resize-handle-se { bottom: -2px; right: -2px; width: 6px; height: 6px; cursor: nwse-resize; }
     `;
   }
 
-  /**
-   * Returns the HTML template for the window.
-   * @returns {string} The HTML template string.
-   */
-  getTemplate() {
-    const title = this.getAttribute('title') || 'Window';
-    const inactive = this.hasAttribute('inactive');
-    const showHelp = this.hasAttribute('show-help');
-    const statusBar = this.hasAttribute('status-bar');
-    const showMinimize = this.hasAttribute('show-minimize') !== false && !showHelp;
-    const showMaximize = this.hasAttribute('show-maximize') !== false;
+  initShadow() {
+    const win98Sheet = new CSSStyleSheet();
+    win98Sheet.replaceSync(win98Styles);
+    const componentSheet = new CSSStyleSheet();
+    componentSheet.replaceSync(Win98Window.componentStyles);
+    this.shadowRoot.adoptedStyleSheets = [win98Sheet, componentSheet];
 
-    return `
-      <div class="window">
-        <div class="title-bar${inactive ? ' inactive' : ''}">
-          <div class="title-bar-text">${title}</div>
+    this.shadowRoot.innerHTML = `
+      <div class="window" data-window-part="root">
+        <div class="title-bar ${this.hasAttribute('inactive') ? 'inactive' : ''}" data-window-action="drag">
+          <div class="title-bar-text" data-window-part="title">${this.getAttribute('title') || 'Window'}</div>
           <div class="title-bar-controls">
-            ${showHelp ? '<button aria-label="Help"></button>' : ''}
-            ${showMinimize ? '<button aria-label="Minimize"></button>' : ''}
-            ${showMaximize ? '<button aria-label="Maximize"></button>' : ''}
-            <button aria-label="Close"></button>
+            <button aria-label="Help" data-window-action="help"></button>
+            <button aria-label="Minimize" data-window-action="minimize"></button>
+            <button aria-label="Maximize" data-window-action="maximize"></button>
+            <button aria-label="Close" data-window-action="close"></button>
           </div>
         </div>
         <div class="window-body">
           <slot></slot>
         </div>
-        ${statusBar ? '<div class="status-bar"><slot name="status"></slot></div>' : ''}
-        ${this.hasAttribute('resizable') ? `
-          <div class="resize-handle resize-handle-nw"></div>
-          <div class="resize-handle resize-handle-n"></div>
-          <div class="resize-handle resize-handle-ne"></div>
-          <div class="resize-handle resize-handle-w"></div>
-          <div class="resize-handle resize-handle-e"></div>
-          <div class="resize-handle resize-handle-sw"></div>
-          <div class="resize-handle resize-handle-s"></div>
-          <div class="resize-handle resize-handle-se"></div>
-        ` : ''}
+        <div class="status-bar">
+          <slot name="status"></slot>
+        </div>
+        <div class="resize-handle resize-handle-nw" data-resize="nw"></div>
+        <div class="resize-handle resize-handle-n" data-resize="n"></div>
+        <div class="resize-handle resize-handle-ne" data-resize="ne"></div>
+        <div class="resize-handle resize-handle-w" data-resize="w"></div>
+        <div class="resize-handle resize-handle-e" data-resize="e"></div>
+        <div class="resize-handle resize-handle-sw" data-resize="sw"></div>
+        <div class="resize-handle resize-handle-s" data-resize="s"></div>
+        <div class="resize-handle resize-handle-se" data-resize="se"></div>
       </div>
     `;
-  }
-
-  /**
-   * Renders the component and sets up styles.
-   */
-  render() {
-    // Import 98.css styles
-    const win98Sheet = new CSSStyleSheet();
-    win98Sheet.replaceSync(win98Styles);
-
-    // Component-specific styles
-    const componentSheet = new CSSStyleSheet();
-    componentSheet.replaceSync(Win98Window.componentStyles);
-
-    // Apply both stylesheets
-    this.shadowRoot.adoptedStyleSheets = [win98Sheet, componentSheet];
-
-    // Set HTML content
-    this.shadowRoot.innerHTML = this.getTemplate();
 
     this.setupInteractions();
   }
 
-  /**
-   * Sets up event listeners for window interactions like dragging and buttons.
-   */
   setupInteractions() {
-    const titleBar = this.shadowRoot.querySelector('.title-bar');
-    const minimizeBtn = this.shadowRoot.querySelector('[aria-label="Minimize"]');
-    const maximizeBtn = this.shadowRoot.querySelector('[aria-label="Maximize"]');
-    const closeBtn = this.shadowRoot.querySelector('[aria-label="Close"]');
-    const helpBtn = this.shadowRoot.querySelector('[aria-label="Help"]');
-
-    // Focus window when clicked anywhere
-    this.addEventListener('mousedown', () => {
-      this.dispatchEvent(new CustomEvent('window-focus', {
-        bubbles: true,
-        composed: true
-      }));
-    });
-
-    // Drag and Drop
-    if (!this.hasAttribute('no-drag')) {
-      titleBar.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === 'BUTTON') return;
-        e.preventDefault();
-
-        const rect = this.getBoundingClientRect();
-        const offsetX = e.clientX - rect.left;
-        const offsetY = e.clientY - rect.top;
-
-        this._startInteraction(e, {
-          cursorClass: 'cursor-drag-default',
-          onMove: (me, ghost) => {
-            ghost.style.left = `${me.clientX - offsetX}px`;
-            ghost.style.top = `${me.clientY - offsetY}px`;
-          },
-          onEnd: (ue) => {
-            this.style.left = `${ue.clientX - offsetX}px`;
-            this.style.top = `${ue.clientY - offsetY}px`;
-          }
-        });
-      });
-    }
-
-    // Controls
-    if (minimizeBtn) {
-      minimizeBtn.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('window-minimize', { bubbles: true, composed: true }));
-      });
-    }
-
-    if (maximizeBtn) {
-      maximizeBtn.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('window-maximize', { bubbles: true, composed: true }));
-        if (this.style.width === '100%' && this.style.height === '100%') {
-          this.style.width = this.dataset.prevWidth || '';
-          this.style.height = this.dataset.prevHeight || '';
-          this.style.top = this.dataset.prevTop || '';
-          this.style.left = this.dataset.prevLeft || '';
-        } else {
-          this.dataset.prevWidth = this.style.width;
-          this.dataset.prevHeight = this.style.height;
-          this.dataset.prevTop = this.style.top;
-          this.dataset.prevLeft = this.style.left;
-          this.style.width = '100%';
-          this.style.height = '100%';
-          this.style.top = '0';
-          this.style.left = '0';
-        }
-      });
-    }
-
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
+    const actionHandlers = {
+      minimize: () => this.dispatchEvent(new CustomEvent('window-minimize', { bubbles: true, composed: true })),
+      maximize: () => this._handleMaximize(),
+      close: () => {
         this.dispatchEvent(new CustomEvent('window-close', { bubbles: true, composed: true }));
         this.remove();
-      });
-    }
+      },
+      help: () => this.dispatchEvent(new CustomEvent('window-help', { bubbles: true, composed: true })),
+      drag: (e) => this._handleDrag(e)
+    };
 
-    if (helpBtn) {
-      helpBtn.addEventListener('click', () => {
-        this.dispatchEvent(new CustomEvent('window-help', { bubbles: true, composed: true }));
-      });
-    }
+    // Single delegated listener for all mousedown events
+    this.shadowRoot.addEventListener('mousedown', (e) => {
+      // Focus window
+      this.dispatchEvent(new CustomEvent('window-focus', { bubbles: true, composed: true }));
 
-    // Resize functionality
-    if (this.hasAttribute('resizable')) {
-      this.setupResize();
-    }
-  }
+      // Find if we clicked an action element (button or title bar)
+      const actionEl = e.target.closest('[data-window-action]');
+      const action = actionEl?.dataset.windowAction;
 
-  /**
-   * Sets up the resize handles and their drag logic.
-   */
-  setupResize() {
-    const resizeConfigs = [
-      { selector: '.resize-handle-nw', cursorClass: 'cursor-drag-nwse', resizeX: -1, resizeY: -1 },
-      { selector: '.resize-handle-n', cursorClass: 'cursor-drag-ns', resizeX: 0, resizeY: -1 },
-      { selector: '.resize-handle-ne', cursorClass: 'cursor-drag-nesw', resizeX: 1, resizeY: -1 },
-      { selector: '.resize-handle-w', cursorClass: 'cursor-drag-ew', resizeX: -1, resizeY: 0 },
-      { selector: '.resize-handle-e', cursorClass: 'cursor-drag-ew', resizeX: 1, resizeY: 0 },
-      { selector: '.resize-handle-sw', cursorClass: 'cursor-drag-nesw', resizeX: -1, resizeY: 1 },
-      { selector: '.resize-handle-s', cursorClass: 'cursor-drag-ns', resizeX: 0, resizeY: 1 },
-      { selector: '.resize-handle-se', cursorClass: 'cursor-drag-nwse', resizeX: 1, resizeY: 1 },
-    ];
+      // Handle Resize handles
+      if (e.target.dataset.resize && this.hasAttribute('resizable')) {
+        this._handleResizeStart(e);
+        return;
+      }
 
-    resizeConfigs.forEach(config => {
-      const handle = this.shadowRoot.querySelector(config.selector);
-      if (!handle) return;
+      if (action && actionHandlers[action]) {
+        // Prevent drag behavior if clicking a button
+        if (e.target.tagName === 'BUTTON' && action === 'drag') return;
 
-      handle.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        this._startInteraction(e, {
-          cursorClass: config.cursorClass,
-          onMove: (me, ghost, initialRect) => {
-            const results = this._calculateResize(
-              me.clientX - e.clientX,
-              me.clientY - e.clientY,
-              initialRect.width, initialRect.height, initialRect.left, initialRect.top,
-              config
-            );
-            ghost.style.width = `${results.width}px`;
-            ghost.style.height = `${results.height}px`;
-            ghost.style.left = `${results.left}px`;
-            ghost.style.top = `${results.top}px`;
-          },
-          onEnd: (ue, ghost, initialRect) => {
-            const results = this._calculateResize(
-              ue.clientX - e.clientX,
-              ue.clientY - e.clientY,
-              initialRect.width, initialRect.height, initialRect.left, initialRect.top,
-              config
-            );
-            this.style.width = `${results.width}px`;
-            this.style.height = `${results.height}px`;
-            this.style.left = `${results.left}px`;
-            this.style.top = `${results.top}px`;
-          }
-        });
-      });
+        actionHandlers[action](e);
+      }
     });
   }
 
-  /**
-   * Creates a ghost element for drag/resize visual feedback.
-   * @private
-   * @param {DOMRect} rect - Initial dimensions and position.
-   * @returns {HTMLElement} The created ghost element.
-   */
-  _createGhost(rect) {
-    const ghost = document.createElement('div');
-    ghost.style.cssText = `
-      position: fixed;
-      width: ${rect.width}px;
-      height: ${rect.height}px;
-      left: ${rect.left}px;
-      top: ${rect.top}px;
-      border: 2px solid white;
-      mix-blend-mode: difference;
-      z-index: 99999;
-      pointer-events: none;
-      box-sizing: border-box;
-    `;
-    document.body.appendChild(ghost);
-    return ghost;
+  _handleMaximize() {
+    this.dispatchEvent(new CustomEvent('window-maximize', { bubbles: true, composed: true }));
+    const isMaximized = this.style.width === '100%' && this.style.height === '100%';
+
+    if (isMaximized) {
+      this.style.width = this.dataset.prevWidth || '';
+      this.style.height = this.dataset.prevHeight || '';
+      this.style.top = this.dataset.prevTop || '';
+      this.style.left = this.dataset.prevLeft || '';
+    } else {
+      this.dataset.prevWidth = this.style.width;
+      this.dataset.prevHeight = this.style.height;
+      this.dataset.prevTop = this.style.top;
+      this.dataset.prevLeft = this.style.left;
+      Object.assign(this.style, { width: '100%', height: '100%', top: '0', left: '0' });
+    }
   }
 
-  /**
-   * Starts a drag or resize interaction.
-   * @private
-   * @param {MouseEvent} e - The initial mousedown event.
-   * @param {Object} options - Interaction options.
-   * @param {Function} options.onMove - Callback for mousemove events.
-   * @param {Function} options.onEnd - Callback for mouseup events.
-   * @param {string} options.cursorClass - CSS class for the cursor overlay.
-   */
+  _handleDrag(e) {
+    if (this.hasAttribute('no-drag') || e.target.tagName === 'BUTTON') return;
+    e.preventDefault();
+
+    const rect = this.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+
+    this._startInteraction(e, {
+      cursorClass: 'cursor-drag-default',
+      onMove: (me, ghost) => {
+        ghost.style.left = `${me.clientX - offsetX}px`;
+        ghost.style.top = `${me.clientY - offsetY}px`;
+      },
+      onEnd: (ue) => {
+        this.style.left = `${ue.clientX - offsetX}px`;
+        this.style.top = `${ue.clientY - offsetY}px`;
+      }
+    });
+  }
+
+  _handleResizeStart(e) {
+    const dir = e.target.dataset.resize;
+    const configs = {
+      nw: { cursor: 'cursor-drag-nwse', x: -1, y: -1 },
+      n: { cursor: 'cursor-drag-ns', x: 0, y: -1 },
+      ne: { cursor: 'cursor-drag-nesw', x: 1, y: -1 },
+      w: { cursor: 'cursor-drag-ew', x: -1, y: 0 },
+      e: { cursor: 'cursor-drag-ew', x: 1, y: 0 },
+      sw: { cursor: 'cursor-drag-nesw', x: -1, y: 1 },
+      s: { cursor: 'cursor-drag-ns', x: 0, y: 1 },
+      se: { cursor: 'cursor-drag-nwse', x: 1, y: 1 },
+    };
+
+    const config = configs[dir];
+    e.preventDefault();
+    e.stopPropagation();
+
+    this._startInteraction(e, {
+      cursorClass: config.cursor,
+      onMove: (me, ghost, initialRect) => {
+        const res = this._calculateResize(me.clientX - e.clientX, me.clientY - e.clientY, initialRect, config);
+        Object.assign(ghost.style, { width: `${res.width}px`, height: `${res.height}px`, left: `${res.left}px`, top: `${res.top}px` });
+      },
+      onEnd: (ue, ghost, initialRect) => {
+        const res = this._calculateResize(ue.clientX - e.clientX, ue.clientY - e.clientY, initialRect, config);
+        Object.assign(this.style, { width: `${res.width}px`, height: `${res.height}px`, left: `${res.left}px`, top: `${res.top}px` });
+      }
+    });
+  }
+
   _startInteraction(e, { onMove, onEnd, cursorClass }) {
     const rect = this.getBoundingClientRect();
     const ghost = this._createGhost(rect);
-    let overlay = null;
-
-    if (cursorClass) {
-      overlay = document.createElement('div');
-      overlay.className = cursorClass;
-      overlay.style.cssText = `
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 99998;
-      `;
-      document.body.appendChild(overlay);
-    }
+    const overlay = this._createOverlay(cursorClass);
 
     const mouseMove = (me) => onMove(me, ghost, rect);
     const mouseUp = (ue) => {
@@ -432,44 +270,40 @@ class Win98Window extends HTMLElement {
     document.addEventListener('mouseup', mouseUp);
   }
 
-  /**
-   * Calculates new dimensions and position during a resize operation.
-   * @private
-   * @param {number} deltaX - Change in X coordinate.
-   * @param {number} deltaY - Change in Y coordinate.
-   * @param {number} startWidth - Initial width.
-   * @param {number} startHeight - Initial height.
-   * @param {number} startLeft - Initial left position.
-   * @param {number} startTop - Initial top position.
-   * @param {Object} config - Resize configuration for the specific handle.
-   * @returns {Object} New width, height, left, and top values.
-   */
-  _calculateResize(deltaX, deltaY, startWidth, startHeight, startLeft, startTop, config) {
-    const minWidth = 100;
-    const minHeight = 100;
-    let newWidth = startWidth;
-    let newHeight = startHeight;
-    let newLeft = startLeft;
-    let newTop = startTop;
+  _createGhost(rect) {
+    const ghost = document.createElement('div');
+    ghost.style.cssText = `
+      position: fixed; width: ${rect.width}px; height: ${rect.height}px;
+      left: ${rect.left}px; top: ${rect.top}px;
+      border: 2px solid white; mix-blend-mode: difference;
+      z-index: 99999; pointer-events: none; box-sizing: border-box;
+    `;
+    document.body.appendChild(ghost);
+    return ghost;
+  }
 
-    if (config.resizeX === -1) {
-      newWidth = Math.max(minWidth, startWidth - deltaX);
-      newLeft = startLeft + (startWidth - newWidth);
-    } else if (config.resizeX === 1) {
-      newWidth = Math.max(minWidth, startWidth + deltaX);
-    }
+  _createOverlay(cursorClass) {
+    if (!cursorClass) return null;
+    const overlay = document.createElement('div');
+    overlay.className = cursorClass;
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99998;';
+    document.body.appendChild(overlay);
+    return overlay;
+  }
 
-    if (config.resizeY === -1) {
-      newHeight = Math.max(minHeight, startHeight - deltaY);
-      newTop = startTop + (startHeight - newHeight);
-    } else if (config.resizeY === 1) {
-      newHeight = Math.max(minHeight, startHeight + deltaY);
-    }
+  _calculateResize(deltaX, deltaY, start, config) {
+    const min = 100;
+    let w = start.width, h = start.height, l = start.left, t = start.top;
 
-    return { width: newWidth, height: newHeight, left: newLeft, top: newTop };
+    if (config.x === -1) { w = Math.max(min, start.width - deltaX); l = start.left + (start.width - w); }
+    else if (config.x === 1) { w = Math.max(min, start.width + deltaX); }
+
+    if (config.y === -1) { h = Math.max(min, start.height - deltaY); t = start.top + (start.height - h); }
+    else if (config.y === 1) { h = Math.max(min, start.height + deltaY); }
+
+    return { width: w, height: h, left: l, top: t };
   }
 }
 
 customElements.define('win98-window', Win98Window);
-
 export default Win98Window;

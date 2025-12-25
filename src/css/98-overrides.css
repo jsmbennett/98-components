@@ -43,7 +43,7 @@ win98-menu-item:hover {
 
 .resize-handle-nw,
 .resize-handle-se {
-    cursor: url('../resources/cursors/resize-fs.png') 2 2, nwse-resize !important;
+    cursor: url('../resources/cursors/resize-fs.png') 7 7, nwse-resize !important;
 }
 
 .resize-handle-ne,
@@ -53,7 +53,7 @@ win98-menu-item:hover {
 
 .resize-handle-n,
 .resize-handle-s {
-    cursor: url('../resources/cursors/resize-ud.png') 2 2, ns-resize !important;
+    cursor: url('../resources/cursors/resize-ud.png') 10 5, ns-resize !important;
 }
 
 .resize-handle-w,

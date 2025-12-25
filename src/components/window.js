@@ -211,8 +211,8 @@ class Win98Window extends HTMLElement {
         // Create ghost outline with XOR effect
         const ghost = document.createElement('div');
         ghost.style.position = 'fixed';
-        ghost.style.width = `${rect.width - 4}px`; // Adjust for border width
-        ghost.style.height = `${rect.height - 4}px`;
+        ghost.style.width = `${rect.width + 2}px`; // Adjust for border width
+        ghost.style.height = `${rect.height + 2}px`;
         ghost.style.left = `${rect.left}px`;
         ghost.style.top = `${rect.top}px`;
         ghost.style.border = '2px solid white';
@@ -297,7 +297,7 @@ class Win98Window extends HTMLElement {
     // Define resize configurations for each handle
     const resizeConfigs = [
       { selector: '.resize-handle-nw', cursor: resizeFsCursor, fallback: 'nwse-resize', resizeX: -1, resizeY: -1 },
-      { selector: '.resize-handle-n', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 0, resizeY: -1 },
+      { selector: '.resize-handle-n', cursor: resizeUdCursor, fallback: 'ns-resize', resizeX: 10, resizeY: 5 },
       { selector: '.resize-handle-ne', cursor: resizeBsCursor, fallback: 'nesw-resize', resizeX: 1, resizeY: -1 },
       { selector: '.resize-handle-w', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: -1, resizeY: 0 },
       { selector: '.resize-handle-e', cursor: resizeLrCursor, fallback: 'ew-resize', resizeX: 1, resizeY: 0 },
@@ -338,8 +338,8 @@ class Win98Window extends HTMLElement {
         // Create ghost outline with XOR effect
         const ghost = document.createElement('div');
         ghost.style.position = 'fixed';
-        ghost.style.width = `${rect.width - 4}px`;
-        ghost.style.height = `${rect.height - 4}px`;
+        ghost.style.width = `${rect.width + 2}px`;
+        ghost.style.height = `${rect.height + 2}px`;
         ghost.style.left = `${rect.left}px`;
         ghost.style.top = `${rect.top}px`;
         ghost.style.border = '2px solid white';

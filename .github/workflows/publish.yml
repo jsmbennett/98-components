@@ -4,11 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version_type:
-        description: 'Version type to increment (minor or major)'
+        description: 'Select version level to increment'
         required: true
-        default: 'minor'
+        default: 'patch'
         type: choice
         options:
+          - patch
           - minor
           - major
 

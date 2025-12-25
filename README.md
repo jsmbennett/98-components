@@ -1,5 +1,7 @@
 # 98-components
 
+<img width="900" height="807" alt="98-components" src="https://github.com/user-attachments/assets/dbbcf638-7e59-49e2-8015-d228f7ad738f" />
+
 A modern Windows 98 UI component library built with Web Components (ES2022), with 98.css as its only dependency. This project started as a sub-project of another project but I got a little carried away. The goals are:
 
 1) Build off the work of 98.css to provide specific interactable components beyond simple CSS styling: A Desktop, basic window management, start menu, and more.

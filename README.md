@@ -1,6 +1,12 @@
 # 98-components
 
-A modern Windows 98 UI component library built with Web Components (ES2022), with 98.css as its only dependency.
+A modern Windows 98 UI component library built with Web Components (ES2022), with 98.css as its only dependency. This project started as a sub-project of another project but I got a little carried away. The goals are:
+
+1) Build off the work of 98.css to provide specific interactable components beyond simple CSS styling: A Desktop, basic window management, start menu, and more.
+2) Learn how to build something (even if badly) using pure modern browser APIs (no React, Vue, etc).
+3) Provide a subset of a Windows 98 desktop experience as accurately as possible.
+
+To see it in action, visit the [demo](https://jsmbennett.github.io/98-components/).
 
 ## Quick Start
 
@@ -12,33 +18,6 @@ npm install 98-components
 pnpm add 98-components
 # or
 yarn add 98-components
-```
-
-### Basic Usage
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script type="module">
-    import '98-components';
-  </script>
-</head>
-<body>
-  <win98-desktop>
-    <win98-window 
-      title="My First Window" 
-      resizable
-      style="top: 50px; left: 50px; width: 400px; height: 300px;">
-      <div class="window-body">
-        <p>Hello, Windows 98!</p>
-      </div>
-    </win98-window>
-
-    <win98-taskbar slot="taskbar"></win98-taskbar>
-  </win98-desktop>
-</body>
-</html>
 ```
 
 ## Development
@@ -53,7 +32,7 @@ pnpm run dev
 # Build library
 pnpm run build
 
-# Build test page
+# Build test page (Github Pages)
 pnpm run build:test
 ```
 

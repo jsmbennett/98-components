@@ -18,7 +18,7 @@
         "build": "npm run build:icons && vite build",
         "build:icons": "node scripts/build-icons.js",
         "clean:icons": "node scripts/build-icons.js --clean",
-        "build:test": "vite build --config vite.build-test.config.js",
+        "build:test": "npm run build:icons && vite build --config vite.build-test.config.js",
         "preview": "vite preview"
     },
     "dependencies": {

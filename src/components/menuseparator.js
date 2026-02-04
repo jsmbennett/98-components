@@ -1,7 +1,18 @@
 import win98Styles from '../css/98-overrides.css?inline';
 
 /**
- * Win98MenuSeparator - A visual separator line for menus.
+ * @element win98-menu-separator
+ * @description A visual separator line for menus
+ * 
+ * Renders a horizontal divider line in the classic Windows 98 style.
+ * Use between `<win98-menu-item>` elements to group related items.
+ * 
+ * @example
+ * <win98-start-menu>
+ *   <win98-menu-item label="Programs" large></win98-menu-item>
+ *   <win98-menu-separator></win98-menu-separator>
+ *   <win98-menu-item label="Shut Down..." large></win98-menu-item>
+ * </win98-start-menu>
  */
 class Win98MenuSeparator extends HTMLElement {
     constructor() {
@@ -19,8 +30,8 @@ class Win98MenuSeparator extends HTMLElement {
         display: block;
         height: 2px;
         margin: 3px 1px;
-        background: white;
-        border-top: 1px solid gray;
+        background: var(--win98-button-highlight);
+        border-top: 1px solid var(--win98-button-shadow);
       }
     `;
     }

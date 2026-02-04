@@ -1,5 +1,32 @@
 import win98Styles from '../css/98-overrides.css?inline';
 
+/**
+ * @element win98-select
+ * @description A Windows 98-style dropdown select component with full keyboard support
+ * 
+ * This is a form-associated custom element that works with native form submission.
+ * Options are provided as slotted `<option>` elements.
+ * 
+ * @attr {string} name - The form field name for this select
+ * @attr {boolean} disabled - Disables the select and prevents interaction
+ * 
+ * @slot - Accepts `<option>` elements as choices
+ * 
+ * @fires change - Fired when the selection changes. Detail: { value: string, index: number }
+ * 
+ * @example
+ * <win98-select name="color">
+ *   <option value="red">Red</option>
+ *   <option value="blue">Blue</option>
+ *   <option value="green">Green</option>
+ * </win98-select>
+ * 
+ * @example
+ * // Listening for changes
+ * select.addEventListener('change', (e) => {
+ *   console.log('Selected:', e.detail.value, 'Index:', e.detail.index);
+ * });
+ */
 class Win98Select extends HTMLElement {
     static get formAssociated() {
         return true;
@@ -212,8 +239,8 @@ class Win98Select extends HTMLElement {
       <style>
         :host {
           display: inline-block;
-          font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
-          font-size: 11px;
+          font-family: var(--win98-font-family);
+          font-size: var(--win98-font-size);
           position: relative;
           width: 150px;
           outline: none;
@@ -226,21 +253,21 @@ class Win98Select extends HTMLElement {
 
         /* Focus style for the text area */
         :host(:focus) .selected-value {
-            background-color: #000080;
-            color: #fff;
+            background-color: var(--win98-highlight);
+            color: var(--win98-highlight-text);
             outline: 1px dotted #ff0;
             outline-offset: -1px;
         }
         
         .select-box {
-          background-color: #fff;
-          border-bottom: 1px solid #fff;
-          border-left: 1px solid #808080;
-          border-right: 1px solid #fff;
-          border-top: 1px solid #808080;
-          box-shadow: inset -1px -1px #dfdfdf, inset 1px 1px #0a0a0a;
+          background-color: var(--win98-window);
+          border-bottom: 1px solid var(--win98-button-highlight);
+          border-left: 1px solid var(--win98-button-shadow);
+          border-right: 1px solid var(--win98-button-highlight);
+          border-top: 1px solid var(--win98-button-shadow);
+          box-shadow: inset -1px -1px var(--win98-button-light), inset 1px 1px var(--win98-button-dark-shadow);
           box-sizing: border-box;
-          color: #000;
+          color: var(--win98-text);
           height: 21px;
           padding: 2px 16px 2px 2px; /* Reduced padding */
           position: relative;
@@ -265,23 +292,23 @@ class Win98Select extends HTMLElement {
             top: 1px;
             width: 16px;
             height: 16px;
-            background-color: #c0c0c0;
-            border-left: 1px solid #fff;
-            border-top: 1px solid #fff;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
-            box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080;
+            background-color: var(--win98-surface);
+            border-left: 1px solid var(--win98-button-highlight);
+            border-top: 1px solid var(--win98-button-highlight);
+            border-right: 1px solid var(--win98-text);
+            border-bottom: 1px solid var(--win98-text);
+            box-shadow: inset 1px 1px var(--win98-button-light), inset -1px -1px var(--win98-button-shadow);
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
         .select-box:active .select-arrow {
-             border-left: 1px solid #000;
-            border-top: 1px solid #020202ff;
-            border-right: 1px solid #fff;
-            border-bottom: 1px solid #fff;
-            box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+            border-left: 1px solid var(--win98-text);
+            border-top: 1px solid var(--win98-text);
+            border-right: 1px solid var(--win98-button-highlight);
+            border-bottom: 1px solid var(--win98-button-highlight);
+            box-shadow: inset 1px 1px var(--win98-button-shadow), inset -1px -1px var(--win98-button-light);
         }
 
         .select-arrow svg {
@@ -297,8 +324,8 @@ class Win98Select extends HTMLElement {
           width: 100%;
           max-height: 200px;
           overflow-y: auto;
-          background-color: #fff;
-          border: 1px solid #000;
+          background-color: var(--win98-window);
+          border: 1px solid var(--win98-text);
           z-index: 1000;
           margin-top: 1px;
         }
@@ -306,14 +333,14 @@ class Win98Select extends HTMLElement {
         .dropdown-item {
           padding: 2px 4px;
           cursor: default;
-          color: #000;
+          color: var(--win98-text);
           border: 1px solid transparent;
         }
 
         .dropdown-item:hover,
         .dropdown-item.selected {
-          background-color: #000080;
-          color: #fff;
+          background-color: var(--win98-highlight);
+          color: var(--win98-highlight-text);
         }
 
         .dropdown-item.selected {

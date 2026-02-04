@@ -98,14 +98,15 @@ class Win98Window extends HTMLElement {
         position: absolute;
         z-index: 10;
       }
-      .resize-handle-nw { top: -2px; left: -2px; width: 6px; height: 6px; cursor: nwse-resize; }
-      .resize-handle-n { top: -2px; left: 6px; right: 6px; height: 4px; cursor: ns-resize; }
-      .resize-handle-ne { top: -2px; right: -2px; width: 6px; height: 6px; cursor: nesw-resize; }
-      .resize-handle-w { top: 6px; left: -2px; bottom: 6px; width: 4px; cursor: ew-resize; }
-      .resize-handle-e { top: 6px; right: -2px; bottom: 6px; width: 4px; cursor: ew-resize; }
-      .resize-handle-sw { bottom: -2px; left: -2px; width: 6px; height: 6px; cursor: nesw-resize; }
-      .resize-handle-s { bottom: -2px; left: 6px; right: 6px; height: 4px; cursor: ns-resize; }
-      .resize-handle-se { bottom: -2px; right: -2px; width: 6px; height: 6px; cursor: nwse-resize; }
+      /* Resize handles use cursor vars if defined, fallback to standard cursors */
+      .resize-handle-nw { top: -2px; left: -2px; width: 6px; height: 6px; }
+      .resize-handle-n { top: -2px; left: 6px; right: 6px; height: 4px; }
+      .resize-handle-ne { top: -2px; right: -2px; width: 6px; height: 6px; }
+      .resize-handle-w { top: 6px; left: -2px; bottom: 6px; width: 4px; }
+      .resize-handle-e { top: 6px; right: -2px; bottom: 6px; width: 4px; }
+      .resize-handle-sw { bottom: -2px; left: -2px; width: 6px; height: 6px; }
+      .resize-handle-s { bottom: -2px; left: 6px; right: 6px; height: 4px; }
+      .resize-handle-se { bottom: -2px; right: -2px; width: 6px; height: 6px; }
     `;
   }
 
@@ -185,19 +186,27 @@ class Win98Window extends HTMLElement {
 
   _handleMaximize() {
     this.dispatchEvent(new CustomEvent('window-maximize', { bubbles: true, composed: true }));
-    const isMaximized = this.style.width === '100%' && this.style.height === '100%';
-
-    if (isMaximized) {
-      this.style.width = this.dataset.prevWidth || '';
-      this.style.height = this.dataset.prevHeight || '';
-      this.style.top = this.dataset.prevTop || '';
-      this.style.left = this.dataset.prevLeft || '';
+    
+    // Use WindowManager for animated maximize/restore
+    const windowId = this.dataset.windowId;
+    if (windowId) {
+      windowManager.maximize(windowId);
     } else {
-      this.dataset.prevWidth = this.style.width;
-      this.dataset.prevHeight = this.style.height;
-      this.dataset.prevTop = this.style.top;
-      this.dataset.prevLeft = this.style.left;
-      Object.assign(this.style, { width: '100%', height: '100%', top: '0', left: '0' });
+      // Fallback for windows not registered with WindowManager
+      const isMaximized = this.style.width === '100%' && this.style.height === '100%';
+
+      if (isMaximized) {
+        this.style.width = this.dataset.prevWidth || '';
+        this.style.height = this.dataset.prevHeight || '';
+        this.style.top = this.dataset.prevTop || '';
+        this.style.left = this.dataset.prevLeft || '';
+      } else {
+        this.dataset.prevWidth = this.style.width;
+        this.dataset.prevHeight = this.style.height;
+        this.dataset.prevTop = this.style.top;
+        this.dataset.prevLeft = this.style.left;
+        Object.assign(this.style, { width: '100%', height: '100%', top: '0', left: '0' });
+      }
     }
   }
 

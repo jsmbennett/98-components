@@ -1,5 +1,21 @@
 import win98Styles from '../css/98-overrides.css?inline';
 
+/**
+ * @element win98-button
+ * @description A Windows 98-style button component
+ * 
+ * @attr {boolean} default - Renders the button with a darker border indicating primary action
+ * @attr {boolean} disabled - Disables the button and applies washed-out styling
+ * 
+ * @slot - The button label/content
+ * 
+ * @fires button-click - Fired when the button is clicked (only if not disabled)
+ * 
+ * @example
+ * <win98-button>Click Me</win98-button>
+ * <win98-button default>OK</win98-button>
+ * <win98-button disabled>Unavailable</win98-button>
+ */
 class Win98Button extends HTMLElement {
   constructor() {
     super();

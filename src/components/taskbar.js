@@ -4,18 +4,29 @@ import windowsLogo from '../resources/icons/misc/windows-logo-start-16x16.png';
 import Win98StartMenu from './startmenu.js';
 
 /**
- * Win98Taskbar - The taskbar component
+ * @element win98-taskbar
+ * @description The Windows 98-style taskbar component
  * 
- * Displays:
- * - Start button
- * - Task buttons for open windows
- * - System tray (optional)
+ * Displays the Start button, task buttons for open windows, and a system tray
+ * with a clock. Automatically syncs with the WindowManager to show/hide task buttons.
+ * 
+ * @slot start-menu - Accepts `<win98-menu-item>` elements for the Start Menu
+ * 
+ * @fires start-menu-toggle - Fired when the Start Menu is opened or closed. Detail: { visible: boolean }
+ * 
+ * @example
+ * <win98-taskbar slot="taskbar">
+ *   <win98-menu-item slot="start-menu" icon-name="notepad" label="Notepad" large></win98-menu-item>
+ *   <win98-menu-separator slot="start-menu"></win98-menu-separator>
+ *   <win98-menu-item slot="start-menu" icon-name="shutDownNormal" label="Shut Down..." large></win98-menu-item>
+ * </win98-taskbar>
  */
 class Win98Taskbar extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this.boundUpdateTasks = this.updateTasks.bind(this);
+    this.taskButtons = new Map(); // Map<windowId, HTMLButtonElement>
   }
 
   connectedCallback() {
@@ -45,8 +56,8 @@ class Win98Taskbar extends HTMLElement {
           display: flex;
           align-items: center;
           height: 100%;
-          background: #c0c0c0;
-          border-top: 2px solid #ffffff;
+          background: var(--win98-surface);
+          border-top: 2px solid var(--win98-button-highlight);
           padding: 2px;
           gap: 2px;
         }
@@ -66,9 +77,9 @@ class Win98Taskbar extends HTMLElement {
           transform: translate(1px, 1px);
         }
         .start-button.active {
-          box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+          box-shadow: var(--win98-shadow-pressed);
           padding: 1px 7px 0 9px; /* Adjust padding to simulate press */
-          outline: 1px dotted #000000;
+          outline: 1px dotted var(--win98-text);
           outline-offset: -4px;
         }
         .start-icon {
@@ -98,7 +109,7 @@ class Win98Taskbar extends HTMLElement {
           min-width: 120px;
           max-width: 160px;
           padding: 0 8px;
-          font-size: 11px;
+          font-size: var(--win98-font-size);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -107,8 +118,8 @@ class Win98Taskbar extends HTMLElement {
         }
 
         .task-button.active {
-          box-shadow: inset -1px -1px #ffffff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
-          background-color: #ffffff;
+          box-shadow: var(--win98-shadow-pressed);
+          background-color: var(--win98-button-highlight);
           font-weight: 700;
         }
 
@@ -121,16 +132,16 @@ class Win98Taskbar extends HTMLElement {
           align-items: center;
           gap: 4px;
           padding: 0 4px;
-          border-left: 1px solid #808080;
-          border-top: 1px solid #808080;
-          border-right: 1px solid #ffffff;
-          border-bottom: 1px solid #ffffff;
+          border-left: 1px solid var(--win98-button-shadow);
+          border-top: 1px solid var(--win98-button-shadow);
+          border-right: 1px solid var(--win98-button-highlight);
+          border-bottom: 1px solid var(--win98-button-highlight);
           height: 18px;
           flex-shrink: 0;
         }
 
         .clock {
-          font-size: 11px;
+          font-size: var(--win98-font-size);
           padding: 0 4px;
         }
       </style>
@@ -172,8 +183,7 @@ class Win98Taskbar extends HTMLElement {
       const isVisible = startMenu.hasAttribute('visible');
 
       if (isVisible) {
-        startMenu.removeAttribute('visible');
-        startButton.classList.remove('active');
+        this.closeStartMenu();
       } else {
         startMenu.setAttribute('visible', '');
         startButton.classList.add('active');
@@ -194,12 +204,27 @@ class Win98Taskbar extends HTMLElement {
         const path = e.composedPath();
         if (!path.includes(this.shadowRoot.querySelector('.start-button')) &&
           !path.includes(startMenu)) {
-          startMenu.removeAttribute('visible');
-          startButton.classList.remove('active');
+          this.closeStartMenu();
         }
       }
     };
     window.addEventListener('mousedown', this.boundOutsideClick);
+  }
+
+  closeStartMenu() {
+    const startMenu = this.shadowRoot.getElementById('start-menu');
+    const startButton = this.shadowRoot.querySelector('.start-button');
+    
+    // Close all submenus in menu items
+    const menuItems = this.querySelectorAll('win98-menu-item[slot="start-menu"]');
+    menuItems.forEach(item => {
+      if (typeof item.closeAllSubmenus === 'function') {
+        item.closeAllSubmenus();
+      }
+    });
+    
+    startMenu.removeAttribute('visible');
+    startButton.classList.remove('active');
   }
 
   cleanup() {
@@ -230,14 +255,19 @@ class Win98Taskbar extends HTMLElement {
 
     const windows = windowManager.getAllWindows();
 
-    // Clear existing tasks
+    // Clear existing tasks and button references
     taskList.innerHTML = '';
+    this.taskButtons.clear();
 
     // Create task buttons
     windows.forEach(window => {
       const button = document.createElement('button');
       button.className = 'task-button';
       button.textContent = window.title;
+      button.dataset.windowId = window.id;
+
+      // Store reference for animation targeting
+      this.taskButtons.set(window.id, button);
 
       if (window.active) {
         button.classList.add('active');
@@ -247,10 +277,11 @@ class Win98Taskbar extends HTMLElement {
       }
 
       button.addEventListener('click', () => {
+        const buttonRect = button.getBoundingClientRect();
         if (window.minimized) {
-          windowManager.restore(window.id);
+          windowManager.restore(window.id, buttonRect);
         } else if (window.active) {
-          windowManager.minimize(window.id);
+          windowManager.minimize(window.id, buttonRect);
         } else {
           windowManager.focus(window.id);
         }
@@ -258,6 +289,16 @@ class Win98Taskbar extends HTMLElement {
 
       taskList.appendChild(button);
     });
+  }
+
+  /**
+   * Get the bounding rect of a task button for a specific window
+   * @param {string} windowId - The window ID
+   * @returns {DOMRect|null} The bounding rect or null if not found
+   */
+  getTaskButtonRect(windowId) {
+    const button = this.taskButtons.get(windowId);
+    return button ? button.getBoundingClientRect() : null;
   }
 
   updateClock() {

@@ -1,4 +1,4 @@
-import win98Styles from '98.css?inline';
+import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
 
 /**
@@ -69,7 +69,7 @@ class Win98Desktop extends HTMLElement {
         .desktop-container {
           position: relative;
           width: 100%;
-          height: calc(100% - 28px); /* Reserve space for taskbar */
+          height: calc(100% - var(--win98-taskbar-height)); /* Reserve space for taskbar */
           overflow: hidden;
         }
 
@@ -78,7 +78,7 @@ class Win98Desktop extends HTMLElement {
           bottom: 0;
           left: 0;
           right: 0;
-          height: 28px;
+          height: var(--win98-taskbar-height);
           z-index: 10000; /* Always on top */
         }
 
@@ -87,12 +87,13 @@ class Win98Desktop extends HTMLElement {
           position: absolute;
         }
       </style>
-      <div class="desktop-container">
+      <div class="desktop-container" id="desktop-area">
         <slot></slot>
       </div>
       <div class="taskbar-container">
         <slot name="taskbar"></slot>
       </div>
+      <slot name="context-menu"></slot>
     `;
     }
 
@@ -120,7 +121,10 @@ class Win98Desktop extends HTMLElement {
             const windowElement = e.target;
             const windowId = windowElement.dataset.windowId;
             if (windowId) {
-                windowManager.minimize(windowId);
+                // Get taskbar button rect for animation
+                const taskbar = this.querySelector('win98-taskbar');
+                const targetRect = taskbar?.getTaskButtonRect?.(windowId) || null;
+                windowManager.minimize(windowId, targetRect);
             }
         });
 
@@ -140,6 +144,28 @@ class Win98Desktop extends HTMLElement {
 
         // Initial registration
         this.registerWindows();
+
+        // Desktop right-click context menu
+        const desktopArea = this.shadowRoot.getElementById('desktop-area');
+        if (desktopArea) {
+            desktopArea.addEventListener('contextmenu', (e) => {
+                // Only show context menu if clicking directly on desktop
+                if (e.target === desktopArea) {
+                    e.preventDefault();
+                    this.showContextMenu(e.clientX, e.clientY);
+                }
+            });
+        }
+    }
+
+    showContextMenu(x, y) {
+        const contextMenuSlot = this.shadowRoot.querySelector('slot[name="context-menu"]');
+        if (contextMenuSlot) {
+            const contextMenus = contextMenuSlot.assignedElements();
+            if (contextMenus.length > 0 && typeof contextMenus[0].show === 'function') {
+                contextMenus[0].show(x, y);
+            }
+        }
     }
 
     /**

@@ -95,9 +95,28 @@
                     <win98-menu-item id="start-menu-accessories" label="Accessories">
                         <div slot="submenu">
                             <win98-menu-item id="start-menu-calculator" label="Calculator"></win98-menu-item>
+                            <win98-menu-item id="start-menu-charmap" label="Character Map"></win98-menu-item>
+                            <win98-menu-item id="start-menu-imaging" label="Imaging"></win98-menu-item>
                             <win98-menu-item id="start-menu-notepad" label="Notepad"></win98-menu-item>
+                            <win98-menu-item id="start-menu-paint" label="Paint"></win98-menu-item>
+                            <win98-menu-item id="start-menu-wordpad" label="WordPad"></win98-menu-item>
                         </div>
                     </win98-menu-item>
+                    <win98-menu-item id="start-menu-games" label="Games">
+                        <div slot="submenu">
+                            <win98-menu-item id="start-menu-freecell" label="FreeCell"></win98-menu-item>
+                            <win98-menu-item id="start-menu-solitaire" label="Solitaire"></win98-menu-item>
+                        </div>
+                    </win98-menu-item>
+                    <win98-menu-item id="start-menu-internet" label="Internet Explorer">
+                        <div slot="submenu">
+                            <win98-menu-item id="start-menu-addressbook" label="Address Book"></win98-menu-item>
+                            <win98-menu-item id="start-menu-ie" label="Internet Explorer"></win98-menu-item>
+                            <win98-menu-item id="start-menu-outlook" label="Outlook Express"></win98-menu-item>
+                        </div>
+                    </win98-menu-item>
+                    <win98-menu-separator></win98-menu-separator>
+                    <win98-menu-item id="start-menu-mediaplayer" label="Windows Media Player"></win98-menu-item>
                     <win98-menu-item id="start-menu-msdos" label="MS-DOS Prompt"></win98-menu-item>
                 </div>
             </win98-menu-item>
@@ -111,9 +130,39 @@
             <win98-menu-item id="start-menu-logoff" slot="start-menu" label="Log Off..." large></win98-menu-item>
             <win98-menu-item id="start-menu-shutdown" slot="start-menu" label="Shut Down..." large></win98-menu-item>
         </win98-taskbar>
+
+        <win98-context-menu slot="context-menu">
+            <win98-menu-item label="Arrange Icons">
+                <div slot="submenu">
+                    <win98-menu-item label="by Name"></win98-menu-item>
+                    <win98-menu-item label="by Type"></win98-menu-item>
+                    <win98-menu-item label="by Size"></win98-menu-item>
+                    <win98-menu-item label="by Date"></win98-menu-item>
+                    <win98-menu-separator></win98-menu-separator>
+                    <win98-menu-item label="Auto Arrange"></win98-menu-item>
+                </div>
+            </win98-menu-item>
+            <win98-menu-item label="Line up Icons"></win98-menu-item>
+            <win98-menu-separator></win98-menu-separator>
+            <win98-menu-item label="Paste"></win98-menu-item>
+            <win98-menu-item label="Paste Shortcut"></win98-menu-item>
+            <win98-menu-separator></win98-menu-separator>
+            <win98-menu-item label="New">
+                <div slot="submenu">
+                    <win98-menu-item label="Folder"></win98-menu-item>
+                    <win98-menu-item label="Shortcut"></win98-menu-item>
+                    <win98-menu-separator></win98-menu-separator>
+                    <win98-menu-item label="Text Document"></win98-menu-item>
+                    <win98-menu-item label="Bitmap Image"></win98-menu-item>
+                    <win98-menu-item label="Wave Sound"></win98-menu-item>
+                </div>
+            </win98-menu-item>
+            <win98-menu-separator></win98-menu-separator>
+            <win98-menu-item label="Properties"></win98-menu-item>
+        </win98-context-menu>
     </win98-desktop>
 
-    <script type="module" src="./component-library.js"></script>
+    <script type="module" src="./main.js"></script>
 </body>
 
 </html>

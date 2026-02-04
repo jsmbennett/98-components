@@ -3,8 +3,9 @@ import win98Styles from '../css/98-overrides.css?inline';
 /**
  * @element win98-context-menu
  * @description A Windows 98-style context menu that appears on right-click
- * 
- * The menu animates diagonally away from the closest corner of the viewport.
+ *
+ * The menu animates towards the bottom-right by default, or bottom-left if there
+ * is insufficient space on the right side of the screen.
  * 
  * @attr {boolean} visible - Controls whether the menu is displayed
  * 
@@ -191,25 +192,26 @@ class Win98ContextMenu extends HTMLElement {
     this.closeAllSubmenus();
     this.classList.remove('animation-done');
 
-    // Determine the closest corner and animation direction
-    const direction = this._calculateDirection(x, y);
-    this.setAttribute('data-direction', direction);
-
     // Show menu first to measure it
     this.setAttribute('visible', '');
-    
+
     // Handle animation end to remove clip-path for nested submenus
     const menu = this.shadowRoot.querySelector('.context-menu');
-    if (menu) {
-      const onAnimationEnd = () => {
-        this.classList.add('animation-done');
-        menu.removeEventListener('animationend', onAnimationEnd);
-      };
-      menu.addEventListener('animationend', onAnimationEnd);
-    }
-    
-    // Position the menu so the appropriate corner is at the cursor
+
+    // Determine animation direction after menu is visible so we can measure it
     requestAnimationFrame(() => {
+      const direction = this._calculateDirection(x, y, menu);
+      this.setAttribute('data-direction', direction);
+
+      if (menu) {
+        const onAnimationEnd = () => {
+          this.classList.add('animation-done');
+          menu.removeEventListener('animationend', onAnimationEnd);
+        };
+        menu.addEventListener('animationend', onAnimationEnd);
+      }
+
+      // Position the menu so the appropriate corner is at the cursor
       this._positionAtCursor(x, y, direction);
     });
   }
@@ -289,30 +291,24 @@ class Win98ContextMenu extends HTMLElement {
   }
 
   /**
-   * Calculate which direction to animate based on closest viewport corner
+   * Calculate which direction to animate based on available space
    * @param {number} x - Click X position
    * @param {number} y - Click Y position
-   * @returns {string} Direction: 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+   * @param {HTMLElement} menu - The menu element to measure
+   * @returns {string} Direction: 'bottom-right' or 'bottom-left'
    */
-  _calculateDirection(x, y) {
+  _calculateDirection(x, y, menu) {
     const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const menuWidth = menu ? menu.getBoundingClientRect().width : 0;
 
-    // Determine which half of the screen we're in
-    const isLeft = x < viewportWidth / 2;
-    const isTop = y < viewportHeight / 2;
+    // Default to bottom-right, but use bottom-left if there's not enough space on the right
+    const spaceOnRight = viewportWidth - x;
 
-    // Animation direction is AWAY from the closest corner
-    // If click is in top-left quadrant, closest corner is top-left, animate toward bottom-right
-    if (isTop && isLeft) {
-      return 'bottom-right';
-    } else if (isTop && !isLeft) {
+    if (spaceOnRight < menuWidth) {
       return 'bottom-left';
-    } else if (!isTop && isLeft) {
-      return 'top-right';
-    } else {
-      return 'top-left';
     }
+
+    return 'bottom-right';
   }
 
   /**

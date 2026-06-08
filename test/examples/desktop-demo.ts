@@ -1,12 +1,17 @@
 /**
  * Desktop Demo - Demonstrates window management features
  */
-import { windowManager } from '../../src/services/WindowManager.js';
+import { windowManager } from '../../src/services/WindowManager';
 
-let demoLaunched = false;
+let demoLaunched: boolean = false;
 
-export function registerDesktopDemo(stage, clearStage, setActiveLink, desktop) {
-  document.getElementById('nav-desktop-demo')?.addEventListener('click', (e) => {
+export function registerDesktopDemo(
+  stage: HTMLElement,
+  clearStage: () => void,
+  setActiveLink: (id: string) => void,
+  desktop: HTMLElement
+): void {
+  document.getElementById('nav-desktop-demo')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-desktop-demo');
     clearStage();
@@ -16,12 +21,12 @@ export function registerDesktopDemo(stage, clearStage, setActiveLink, desktop) {
   });
 }
 
-function launchDesktopDemo(desktop) {
+function launchDesktopDemo(desktop: HTMLElement): void {
   if (demoLaunched) return;
   demoLaunched = true;
 
   // Notepad
-  desktop.createWindow({
+  (desktop as any).createWindow({
     title: 'Notepad',
     resizable: true,
     statusBar: true,
@@ -35,7 +40,7 @@ function launchDesktopDemo(desktop) {
   });
 
   // Window Creator
-  const controlPanel = desktop.createWindow({
+  const controlPanel = (desktop as any).createWindow({
     title: 'Window Creator',
     x: 200,
     y: 150,
@@ -51,12 +56,12 @@ function launchDesktopDemo(desktop) {
     `
   });
 
-  let windowCounter = 1;
+  let windowCounter: number = 1;
 
-  const createWindowBtn = controlPanel.querySelector('#create-window-btn');
+  const createWindowBtn = controlPanel.querySelector('#create-window-btn') as HTMLElement | null;
   createWindowBtn?.addEventListener('click', () => {
     const offset = windowCounter * 30;
-    desktop.createWindow({
+    (desktop as any).createWindow({
       title: `New Window ${windowCounter}`,
       resizable: true,
       x: 100 + offset,
@@ -72,10 +77,10 @@ function launchDesktopDemo(desktop) {
     windowCounter++;
   });
 
-  const createDialogBtn = controlPanel.querySelector('#create-dialog-btn');
+  const createDialogBtn = controlPanel.querySelector('#create-dialog-btn') as HTMLElement | null;
   createDialogBtn?.addEventListener('click', () => {
     const offset = windowCounter * 20;
-    desktop.createWindow({
+    (desktop as any).createWindow({
       title: 'Information',
       x: 300 + offset,
       y: 200 + offset,
@@ -96,12 +101,12 @@ function launchDesktopDemo(desktop) {
   });
 
   // Update window count
-  const windowCountSpan = controlPanel.querySelector('#window-count');
-  function updateWindowCount() {
+  const windowCountSpan = controlPanel.querySelector('#window-count') as HTMLElement | null;
+  const updateWindowCount = (): void => {
     if (windowCountSpan) {
-      windowCountSpan.textContent = desktop.getWindowCount();
+      windowCountSpan.textContent = (desktop as any).getWindowCount();
     }
-  }
+  };
   windowManager.addEventListener('window-registered', updateWindowCount);
   windowManager.addEventListener('window-unregistered', updateWindowCount);
   updateWindowCount();

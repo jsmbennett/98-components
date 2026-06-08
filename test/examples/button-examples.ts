@@ -2,9 +2,13 @@
  * Button component examples
  */
 
-export function registerButtonExamples(stage, clearStage, setActiveLink) {
+export function registerButtonExamples(
+  stage: HTMLElement,
+  clearStage: () => void,
+  setActiveLink: (id: string) => void
+): void {
   // Basic Button
-  document.getElementById('nav-button-basic')?.addEventListener('click', (e) => {
+  document.getElementById('nav-button-basic')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-button-basic');
     clearStage();
@@ -15,14 +19,14 @@ export function registerButtonExamples(stage, clearStage, setActiveLink) {
       <win98-button>Click Me</win98-button>
       <p style="margin-top: 16px;">A standard button with default styling.</p>
     `;
-    div.querySelector('win98-button').addEventListener('button-click', () => {
+    (div.querySelector('win98-button') as HTMLElement)?.addEventListener('button-click', () => {
       alert('Button clicked!');
     });
     stage.appendChild(div);
   });
 
   // Default Button
-  document.getElementById('nav-button-default')?.addEventListener('click', (e) => {
+  document.getElementById('nav-button-default')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-button-default');
     clearStage();
@@ -38,7 +42,7 @@ export function registerButtonExamples(stage, clearStage, setActiveLink) {
   });
 
   // Disabled Button
-  document.getElementById('nav-button-disabled')?.addEventListener('click', (e) => {
+  document.getElementById('nav-button-disabled')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-button-disabled');
     clearStage();

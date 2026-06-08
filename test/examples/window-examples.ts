@@ -2,9 +2,13 @@
  * Window component examples
  */
 
-export function registerWindowExamples(stage, clearStage, setActiveLink) {
+export function registerWindowExamples(
+  stage: HTMLElement,
+  clearStage: () => void,
+  setActiveLink: (id: string) => void
+): void {
   // Basic Window
-  document.getElementById('nav-window-basic')?.addEventListener('click', (e) => {
+  document.getElementById('nav-window-basic')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-window-basic');
     clearStage();
@@ -24,7 +28,7 @@ export function registerWindowExamples(stage, clearStage, setActiveLink) {
   });
 
   // Resizable Window
-  document.getElementById('nav-window-resizable')?.addEventListener('click', (e) => {
+  document.getElementById('nav-window-resizable')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-window-resizable');
     clearStage();
@@ -45,7 +49,7 @@ export function registerWindowExamples(stage, clearStage, setActiveLink) {
   });
 
   // Window with Status Bar
-  document.getElementById('nav-window-status')?.addEventListener('click', (e) => {
+  document.getElementById('nav-window-status')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-window-status');
     clearStage();
@@ -70,7 +74,7 @@ export function registerWindowExamples(stage, clearStage, setActiveLink) {
   });
 
   // Inactive Window
-  document.getElementById('nav-window-inactive')?.addEventListener('click', (e) => {
+  document.getElementById('nav-window-inactive')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-window-inactive');
     clearStage();
@@ -92,7 +96,7 @@ export function registerWindowExamples(stage, clearStage, setActiveLink) {
   });
 
   // Help Button Window
-  document.getElementById('nav-window-help')?.addEventListener('click', (e) => {
+  document.getElementById('nav-window-help')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-window-help');
     clearStage();

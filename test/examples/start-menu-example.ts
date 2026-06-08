@@ -1,12 +1,16 @@
 /**
  * Start Menu component example
- * 
+ *
  * This example demonstrates using the icon-name attribute
  * with the iconRegistry for declarative icon assignment.
  */
 
-export function registerStartMenuExample(stage, clearStage, setActiveLink) {
-  document.getElementById('nav-start-menu')?.addEventListener('click', (e) => {
+export function registerStartMenuExample(
+  stage: HTMLElement,
+  clearStage: () => void,
+  setActiveLink: (id: string) => void
+): void {
+  document.getElementById('nav-start-menu')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-start-menu');
     clearStage();
@@ -15,7 +19,6 @@ export function registerStartMenuExample(stage, clearStage, setActiveLink) {
     div.style.height = '500px';
     div.style.position = 'relative';
 
-    // Using icon-name attribute with registry (declarative approach)
     div.innerHTML = `
       <p>The Start Menu component with slotted content.</p>
       <p style="font-size: 11px; color: #666;">

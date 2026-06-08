@@ -2,9 +2,13 @@
  * Select/Dropdown component examples
  */
 
-export function registerSelectExamples(stage, clearStage, setActiveLink) {
+export function registerSelectExamples(
+  stage: HTMLElement,
+  clearStage: () => void,
+  setActiveLink: (id: string) => void
+): void {
   // Select / Dropdown
-  document.getElementById('nav-select')?.addEventListener('click', (e) => {
+  document.getElementById('nav-select')?.addEventListener('click', (e: Event) => {
     e.preventDefault();
     setActiveLink('nav-select');
     clearStage();
@@ -32,16 +36,16 @@ export function registerSelectExamples(stage, clearStage, setActiveLink) {
       </div>
     `;
 
-    const form = div.querySelector('#demo-form');
-    const select = div.querySelector('win98-select');
-    const output = div.querySelector('#select-output');
-    const formOutput = div.querySelector('#form-output');
+    const form = div.querySelector('#demo-form') as HTMLFormElement;
+    const select = div.querySelector('win98-select') as HTMLElement;
+    const output = div.querySelector('#select-output') as HTMLElement;
+    const formOutput = div.querySelector('#form-output') as HTMLElement;
 
-    select.addEventListener('change', (e) => {
+    select.addEventListener('change', (e: any) => {
       output.textContent = `Selected: Option ${e.detail.value} (Index: ${e.detail.index})`;
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', (e: Event) => {
       e.preventDefault();
       const formData = new FormData(form);
       const value = formData.get('demo-select');

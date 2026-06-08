@@ -1,58 +1,49 @@
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import win98Styles from '../css/98-overrides.css?inline';
 
-class Win98Button extends HTMLElement {
+class Win98Button extends LitElement {
+  static properties = {
+    default: { type: Boolean, reflect: true },
+    disabled: { type: Boolean, reflect: true }
+  };
+
+  static styles = [
+    css`${unsafeCSS(win98Styles)}`,
+    css`
+      :host {
+        display: inline-block;
+      }
+    `
+  ];
+
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
-  }
-
-  connectedCallback() {
-    this.render();
-  }
-
-  static get observedAttributes() {
-    return ['default', 'disabled'];
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (this.shadowRoot) {
-      this.render();
-    }
+    this.default = false;
+    this.disabled = false;
   }
 
   render() {
-    const isDefault = this.hasAttribute('default');
-    const isDisabled = this.hasAttribute('disabled');
-
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(win98Styles);
-    this.shadowRoot.adoptedStyleSheets = [sheet];
-
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: inline-block;
-        }
-      </style>
-      <button class="${isDefault ? 'default' : ''}" ${isDisabled ? 'disabled' : ''}>
+    return html`
+      <button
+        class="${this.default ? 'default' : ''}"
+        ?disabled="${this.disabled}"
+        @click="${this._onClick}"
+      >
         <slot></slot>
       </button>
     `;
-
-    this.setupInteractions();
   }
 
-  setupInteractions() {
-    const button = this.shadowRoot.querySelector('button');
-
-    button.addEventListener('click', (e) => {
-      if (!this.hasAttribute('disabled')) {
-        this.dispatchEvent(new CustomEvent('button-click', {
-          bubbles: true,
-          composed: true
-        }));
-      }
-    });
+  _onClick(e) {
+    if (this.disabled) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    this.dispatchEvent(new CustomEvent('button-click', {
+      bubbles: true,
+      composed: true
+    }));
   }
 }
 

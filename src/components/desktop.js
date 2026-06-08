@@ -1,3 +1,4 @@
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import win98Styles from '98.css?inline';
 import { windowManager } from '../services/WindowManager.js';
 
@@ -19,74 +20,128 @@ import { windowManager } from '../services/WindowManager.js';
 
 /**
  * Win98Desktop - The root container component.
- * 
+ *
  * This component acts as the "viewport" or "screen" for the Windows 98 environment.
- * It manages window placement, z-index stacking via the WindowManager, and provides 
+ * It manages window placement, z-index stacking via the WindowManager, and provides
  * a taskbar area.
- * 
+ *
  * @element win98-desktop
- * 
+ *
  * @slot - The default slot for `<win98-window>` elements.
  * @slot taskbar - The slot for the `<win98-taskbar>` component.
- * 
+ *
  * @cssprop [--desktop-background=#008080] - The background color of the desktop.
- * 
+ *
  * @listens window-focus - Focuses the window when it requests focus.
  * @listens window-close - Unregisters the window when it is closed.
  * @listens window-minimize - Minimizes the window when requested.
  */
-class Win98Desktop extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+class Win98Desktop extends LitElement {
+  static styles = [
+    css`${unsafeCSS(win98Styles)}`,
+    css`
+      :host {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        background: var(--desktop-background, #008080);
+        overflow: hidden;
+      }
+
+      .desktop-container {
+        position: relative;
+        width: 100%;
+        height: calc(100% - 28px);
+        overflow: hidden;
+      }
+
+      .taskbar-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 28px;
+        z-index: 10000;
+      }
+
+      ::slotted(win98-window) {
+        position: absolute;
+      }
+    `
+  ];
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.setupEventListeners();
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.cleanup();
+  }
+
+  setupEventListeners() {
+    this.addEventListener('window-focus', (e) => {
+      const windowElement = e.target;
+      const windowId = windowElement.dataset.windowId;
+      if (windowId) {
+        windowManager.focus(windowId);
+      }
+    });
+
+    this.addEventListener('window-close', (e) => {
+      const windowElement = e.target;
+      const windowId = windowElement.dataset.windowId;
+      if (windowId) {
+        windowManager.unregister(windowId);
+      }
+    });
+
+    this.addEventListener('window-minimize', (e) => {
+      const windowElement = e.target;
+      const windowId = windowElement.dataset.windowId;
+      if (windowId) {
+        windowManager.minimize(windowId);
+      }
+    });
+
+    this.addEventListener('window-maximize', (e) => {
+      console.log('Window maximized:', e.target);
+    });
+
+    const slot = this.renderRoot.querySelector('slot:not([name])');
+    if (slot) {
+      slot.addEventListener('slotchange', () => {
+        this.registerWindows();
+      });
     }
 
-    connectedCallback() {
-        this.render();
-        this.setupEventListeners();
-    }
+    this.registerWindows();
+  }
 
-    disconnectedCallback() {
-        this.cleanup();
-    }
+  registerWindows() {
+    const slot = this.renderRoot.querySelector('slot:not([name])');
+    if (!slot) return;
 
-    render() {
-        const sheet = new CSSStyleSheet();
-        sheet.replaceSync(win98Styles);
-        this.shadowRoot.adoptedStyleSheets = [sheet];
+    const windows = slot.assignedElements().filter(el => el.tagName === 'WIN98-WINDOW');
 
-        this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          position: relative;
-          width: 100%;
-          height: 100vh;
-          background: var(--desktop-background, #008080);
-          overflow: hidden;
-        }
+    windows.forEach(windowElement => {
+      if (!windowElement.dataset.windowId) {
+        const title = windowElement.getAttribute('title') || 'Window';
+        const icon = windowElement.getAttribute('icon') || null;
 
-        .desktop-container {
-          position: relative;
-          width: 100%;
-          height: calc(100% - 28px); /* Reserve space for taskbar */
-          overflow: hidden;
-        }
+        windowManager.register(windowElement, { title, icon });
+      }
+    });
+  }
 
-        .taskbar-container {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 28px;
-          z-index: 10000; /* Always on top */
-        }
+  cleanup() {
+    // Clean up event listeners if needed
+  }
 
-        /* Slot for windows */
-        ::slotted(win98-window) {
-          position: absolute;
-        }
-      </style>
+  render() {
+    return html`
       <div class="desktop-container">
         <slot></slot>
       </div>
@@ -94,131 +149,57 @@ class Win98Desktop extends HTMLElement {
         <slot name="taskbar"></slot>
       </div>
     `;
+  }
+
+  /**
+   * Programmatically create and add a window to the desktop.
+   *
+   * @param {WindowOptions} options - Configuration for the new window.
+   * @returns {HTMLElement} The created `<win98-window>` element.
+   */
+  createWindow(options = {}) {
+    const window = document.createElement('win98-window');
+
+    if (options.title) window.setAttribute('title', options.title);
+    if (options.icon) window.setAttribute('icon', options.icon);
+    if (options.resizable) window.setAttribute('resizable', '');
+    if (options.showHelp) window.setAttribute('show-help', '');
+    if (options.statusBar) window.setAttribute('status-bar', '');
+    if (options.showMinimize !== false) window.setAttribute('show-minimize', '');
+    if (options.showMaximize !== false) window.setAttribute('show-maximize', '');
+
+    if (options.x !== undefined) window.style.left = `${options.x}px`;
+    if (options.y !== undefined) window.style.top = `${options.y}px`;
+    if (options.width !== undefined) window.style.width = `${options.width}px`;
+    if (options.height !== undefined) window.style.height = `${options.height}px`;
+
+    if (options.content) {
+      if (typeof options.content === 'string') {
+        window.innerHTML = options.content;
+      } else if (options.content instanceof HTMLElement) {
+        window.appendChild(options.content);
+      }
     }
 
-    setupEventListeners() {
-        // Listen for window focus events from child windows
-        this.addEventListener('window-focus', (e) => {
-            const windowElement = e.target;
-            const windowId = windowElement.dataset.windowId;
-            if (windowId) {
-                windowManager.focus(windowId);
-            }
-        });
+    this.appendChild(window);
+    return window;
+  }
 
-        // Listen for window close events
-        this.addEventListener('window-close', (e) => {
-            const windowElement = e.target;
-            const windowId = windowElement.dataset.windowId;
-            if (windowId) {
-                windowManager.unregister(windowId);
-            }
-        });
+  /**
+   * Get the count of all windows
+   * @returns {number} Number of windows
+   */
+  getWindowCount() {
+    return windowManager.getWindowCount();
+  }
 
-        // Listen for window minimize events
-        this.addEventListener('window-minimize', (e) => {
-            const windowElement = e.target;
-            const windowId = windowElement.dataset.windowId;
-            if (windowId) {
-                windowManager.minimize(windowId);
-            }
-        });
-
-        // Listen for window maximize events (just for logging/tracking)
-        this.addEventListener('window-maximize', (e) => {
-            // Window handles its own maximize, we just track it
-            console.log('Window maximized:', e.target);
-        });
-
-        // Observe slot changes to register new windows
-        const slot = this.shadowRoot.querySelector('slot:not([name])');
-        if (slot) {
-            slot.addEventListener('slotchange', () => {
-                this.registerWindows();
-            });
-        }
-
-        // Initial registration
-        this.registerWindows();
-    }
-
-    /**
-     * Register all slotted windows with the WindowManager
-     */
-    registerWindows() {
-        const slot = this.shadowRoot.querySelector('slot:not([name])');
-        if (!slot) return;
-
-        const windows = slot.assignedElements().filter(el => el.tagName === 'WIN98-WINDOW');
-
-        windows.forEach(windowElement => {
-            // Only register if not already registered
-            if (!windowElement.dataset.windowId) {
-                const title = windowElement.getAttribute('title') || 'Window';
-                const icon = windowElement.getAttribute('icon') || null;
-
-                windowManager.register(windowElement, { title, icon });
-            }
-        });
-    }
-
-    cleanup() {
-        // Clean up event listeners if needed
-    }
-
-    /**
-     * Programmatically create and add a window to the desktop.
-     * 
-     * @param {WindowOptions} options - Configuration for the new window.
-     * @returns {HTMLElement} The created `<win98-window>` element.
-     */
-    createWindow(options = {}) {
-        const window = document.createElement('win98-window');
-
-        if (options.title) window.setAttribute('title', options.title);
-        if (options.icon) window.setAttribute('icon', options.icon);
-        if (options.resizable) window.setAttribute('resizable', '');
-        if (options.showHelp) window.setAttribute('show-help', '');
-        if (options.statusBar) window.setAttribute('status-bar', '');
-        if (options.showMinimize !== false) window.setAttribute('show-minimize', '');
-        if (options.showMaximize !== false) window.setAttribute('show-maximize', '');
-
-        // Set initial position and size
-        if (options.x !== undefined) window.style.left = `${options.x}px`;
-        if (options.y !== undefined) window.style.top = `${options.y}px`;
-        if (options.width !== undefined) window.style.width = `${options.width}px`;
-        if (options.height !== undefined) window.style.height = `${options.height}px`;
-
-        // Add content if provided
-        if (options.content) {
-            if (typeof options.content === 'string') {
-                window.innerHTML = options.content;
-            } else if (options.content instanceof HTMLElement) {
-                window.appendChild(options.content);
-            }
-        }
-
-        this.appendChild(window);
-
-        return window;
-    }
-
-    /**
-     * Get the count of all windows
-     * @returns {number} Number of windows
-     */
-    getWindowCount() {
-        return windowManager.getWindowCount();
-    }
-
-    /**
-     * Get all windows
-     * @returns {Array} Array of window data objects
-     */
-    getAllWindows() {
-        return windowManager.getAllWindows();
-    }
-
+  /**
+   * Get all windows
+   * @returns {Array} Array of window data objects
+   */
+  getAllWindows() {
+    return windowManager.getAllWindows();
+  }
 }
 
 customElements.define('win98-desktop', Win98Desktop);

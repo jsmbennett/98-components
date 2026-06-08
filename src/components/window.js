@@ -1,72 +1,39 @@
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import win98Styles from '../css/98-overrides.css?inline';
 import { windowManager } from '../services/WindowManager.js';
 
-/**
- * @element win98-window
- * @description A Windows 98-style window component
- * 
- * @attr {string} title - The title of the window.
- * @attr {boolean} resizable - Whether the window can be resized.
- * @attr {boolean} inactive - Whether the window is in an inactive state.
- * @attr {boolean} show-help - Whether to show the help button in the title bar.
- * @attr {boolean} status-bar - Whether to show a status bar at the bottom.
- * @attr {boolean} show-minimize - Whether to show the minimize button.
- * @attr {boolean} show-maximize - Whether to show the maximize button.
- * @attr {boolean} no-drag - Whether to disable window dragging.
- * 
- * @slot - The main content of the window.
- * @slot status - Content for the status bar.
- * 
- * @fires window-focus - Fired when the window is clicked or focused.
- * @fires window-minimize - Fired when the minimize button is clicked.
- * @fires window-maximize - Fired when the maximize button is clicked.
- * @fires window-close - Fired when the close button is clicked.
- * @fires window-help - Fired when the help button is clicked.
- */
-class Win98Window extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-    this._isInitialized = false;
-  }
-
-  connectedCallback() {
-    if (!this._isInitialized) {
-      this.initShadow();
-      this._isInitialized = true;
-    }
-  }
-
-  disconnectedCallback() {
-    const windowId = this.dataset.windowId;
-    if (windowId) {
-      windowManager.unregister(windowId);
-    }
-  }
-
-  static get observedAttributes() {
-    return ['title', 'resizable', 'inactive', 'show-help', 'status-bar', 'show-minimize', 'show-maximize'];
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (!this._isInitialized) return;
-
-    if (name === 'title') {
-      const titleEl = this.shadowRoot.querySelector('[data-window-part="title"]');
-      if (titleEl) titleEl.textContent = newValue || 'Window';
-      if (this.dataset.windowId) {
-        windowManager.updateWindow(this.dataset.windowId, { title: newValue });
+class Win98Window extends LitElement {
+  static properties = {
+    title: { type: String },
+    resizable: { type: Boolean, reflect: true },
+    inactive: { type: Boolean, reflect: true },
+    showHelp: { type: Boolean, attribute: 'show-help', reflect: true },
+    statusBar: { type: Boolean, attribute: 'status-bar', reflect: true },
+    showMinimize: {
+      type: Boolean,
+      attribute: 'show-minimize',
+      reflect: true,
+      converter: {
+        fromAttribute: (value) => value !== 'false',
+        toAttribute: (value) => value ? '' : null
       }
-    }
+    },
+    showMaximize: {
+      type: Boolean,
+      attribute: 'show-maximize',
+      reflect: true,
+      converter: {
+        fromAttribute: (value) => value !== 'false',
+        toAttribute: (value) => value ? '' : null
+      }
+    },
+    noDrag: { type: Boolean, attribute: 'no-drag', reflect: true },
+    icon: { type: String }
+  };
 
-    if (name === 'inactive') {
-      const titleBar = this.shadowRoot.querySelector('.title-bar');
-      if (titleBar) titleBar.classList.toggle('inactive', this.hasAttribute('inactive'));
-    }
-  }
-
-  static get componentStyles() {
-    return `
+  static styles = [
+    css`${unsafeCSS(win98Styles)}`,
+    css`
       :host {
         display: block;
         position: absolute;
@@ -89,7 +56,10 @@ class Win98Window extends HTMLElement {
       :host([show-help]) [data-window-action="minimize"],
       :host([show-help]) [data-window-action="maximize"] { display: none; }
       
+      :host(:not([show-minimize])) [data-window-action="minimize"],
       :host([show-minimize="false"]) [data-window-action="minimize"] { display: none; }
+      
+      :host(:not([show-maximize])) [data-window-action="maximize"],
       :host([show-maximize="false"]) [data-window-action="maximize"] { display: none; }
       
       :host(:not([show-help])) [data-window-action="help"] { display: none; }
@@ -106,20 +76,50 @@ class Win98Window extends HTMLElement {
       .resize-handle-sw { bottom: -2px; left: -2px; width: 6px; height: 6px; cursor: nesw-resize; }
       .resize-handle-s { bottom: -2px; left: 6px; right: 6px; height: 4px; cursor: ns-resize; }
       .resize-handle-se { bottom: -2px; right: -2px; width: 6px; height: 6px; cursor: nwse-resize; }
-    `;
+    `
+  ];
+
+  constructor() {
+    super();
+    this.title = 'Window';
+    this.resizable = false;
+    this.inactive = false;
+    this.showHelp = false;
+    this.statusBar = false;
+    this.showMinimize = true;
+    this.showMaximize = true;
+    this.noDrag = false;
+    this.icon = null;
   }
 
-  initShadow() {
-    const win98Sheet = new CSSStyleSheet();
-    win98Sheet.replaceSync(win98Styles);
-    const componentSheet = new CSSStyleSheet();
-    componentSheet.replaceSync(Win98Window.componentStyles);
-    this.shadowRoot.adoptedStyleSheets = [win98Sheet, componentSheet];
+  connectedCallback() {
+    super.connectedCallback();
+    // Register with windowManager if not already registered
+    if (!this.dataset.windowId) {
+      windowManager.register(this, { title: this.title, icon: this.icon });
+    }
+  }
 
-    this.shadowRoot.innerHTML = `
-      <div class="window" data-window-part="root">
-        <div class="title-bar ${this.hasAttribute('inactive') ? 'inactive' : ''}" data-window-action="drag">
-          <div class="title-bar-text" data-window-part="title">${this.getAttribute('title') || 'Window'}</div>
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    const windowId = this.dataset.windowId;
+    if (windowId) {
+      windowManager.unregister(windowId);
+    }
+  }
+
+  updated(changedProperties) {
+    super.updated(changedProperties);
+    if (changedProperties.has('title') && this.dataset.windowId) {
+      windowManager.updateWindow(this.dataset.windowId, { title: this.title });
+    }
+  }
+
+  render() {
+    return html`
+      <div class="window" data-window-part="root" @mousedown="${this._onMouseDown}">
+        <div class="title-bar ${this.inactive ? 'inactive' : ''}" data-window-action="drag">
+          <div class="title-bar-text" data-window-part="title">${this.title}</div>
           <div class="title-bar-controls">
             <button aria-label="Help" data-window-action="help"></button>
             <button aria-label="Minimize" data-window-action="minimize"></button>
@@ -133,6 +133,8 @@ class Win98Window extends HTMLElement {
         <div class="status-bar">
           <slot name="status"></slot>
         </div>
+        
+        <!-- Drag/Resize targets -->
         <div class="resize-handle resize-handle-nw" data-resize="nw"></div>
         <div class="resize-handle resize-handle-n" data-resize="n"></div>
         <div class="resize-handle resize-handle-ne" data-resize="ne"></div>
@@ -143,44 +145,45 @@ class Win98Window extends HTMLElement {
         <div class="resize-handle resize-handle-se" data-resize="se"></div>
       </div>
     `;
-
-    this.setupInteractions();
   }
 
-  setupInteractions() {
-    const actionHandlers = {
-      minimize: () => this.dispatchEvent(new CustomEvent('window-minimize', { bubbles: true, composed: true })),
-      maximize: () => this._handleMaximize(),
-      close: () => {
+  _onMouseDown(e) {
+    // Focus window
+    this.dispatchEvent(new CustomEvent('window-focus', { bubbles: true, composed: true }));
+
+    const actionEl = e.target.closest('[data-window-action]');
+    const action = actionEl?.dataset.windowAction;
+
+    if (e.target.dataset.resize && this.resizable) {
+      this._handleResizeStart(e);
+      return;
+    }
+
+    if (action) {
+      if (e.target.tagName === 'BUTTON' && action === 'drag') return;
+      this._handleAction(action, e);
+    }
+  }
+
+  _handleAction(action, e) {
+    switch (action) {
+      case 'minimize':
+        this.dispatchEvent(new CustomEvent('window-minimize', { bubbles: true, composed: true }));
+        break;
+      case 'maximize':
+        this._handleMaximize();
+        break;
+      case 'close':
         this.dispatchEvent(new CustomEvent('window-close', { bubbles: true, composed: true }));
         this.remove();
-      },
-      help: () => this.dispatchEvent(new CustomEvent('window-help', { bubbles: true, composed: true })),
-      drag: (e) => this._handleDrag(e)
-    };
-
-    // Single delegated listener for all mousedown events
-    this.shadowRoot.addEventListener('mousedown', (e) => {
-      // Focus window
-      this.dispatchEvent(new CustomEvent('window-focus', { bubbles: true, composed: true }));
-
-      // Find if we clicked an action element (button or title bar)
-      const actionEl = e.target.closest('[data-window-action]');
-      const action = actionEl?.dataset.windowAction;
-
-      // Handle Resize handles
-      if (e.target.dataset.resize && this.hasAttribute('resizable')) {
-        this._handleResizeStart(e);
-        return;
-      }
-
-      if (action && actionHandlers[action]) {
-        // Prevent drag behavior if clicking a button
-        if (e.target.tagName === 'BUTTON' && action === 'drag') return;
-
-        actionHandlers[action](e);
-      }
-    });
+        break;
+      case 'help':
+        this.dispatchEvent(new CustomEvent('window-help', { bubbles: true, composed: true }));
+        break;
+      case 'drag':
+        this._handleDrag(e);
+        break;
+    }
   }
 
   _handleMaximize() {
@@ -199,10 +202,12 @@ class Win98Window extends HTMLElement {
       this.dataset.prevLeft = this.style.left;
       Object.assign(this.style, { width: '100%', height: '100%', top: '0', left: '0' });
     }
+
+    this.dispatchEvent(new CustomEvent('window-resize', { bubbles: true, composed: true }));
   }
 
   _handleDrag(e) {
-    if (this.hasAttribute('no-drag') || e.target.tagName === 'BUTTON') return;
+    if (this.noDrag || e.target.tagName === 'BUTTON') return;
     e.preventDefault();
 
     const rect = this.getBoundingClientRect();
@@ -218,6 +223,7 @@ class Win98Window extends HTMLElement {
       onEnd: (ue) => {
         this.style.left = `${ue.clientX - offsetX}px`;
         this.style.top = `${ue.clientY - offsetY}px`;
+        this.dispatchEvent(new CustomEvent('window-move', { bubbles: true, composed: true }));
       }
     });
   }
@@ -248,6 +254,7 @@ class Win98Window extends HTMLElement {
       onEnd: (ue, ghost, initialRect) => {
         const res = this._calculateResize(ue.clientX - e.clientX, ue.clientY - e.clientY, initialRect, config);
         Object.assign(this.style, { width: `${res.width}px`, height: `${res.height}px`, left: `${res.left}px`, top: `${res.top}px` });
+        this.dispatchEvent(new CustomEvent('window-resize', { bubbles: true, composed: true }));
       }
     });
   }

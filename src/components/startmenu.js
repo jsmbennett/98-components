@@ -1,17 +1,14 @@
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import win98Styles from '../css/98-overrides.css?inline';
 
-class Win98StartMenu extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
+class Win98StartMenu extends LitElement {
+  static properties = {
+    visible: { type: Boolean, reflect: true }
+  };
 
-    connectedCallback() {
-        this.render();
-    }
-
-    static get componentStyles() {
-        return `
+  static styles = [
+    css`${unsafeCSS(win98Styles)}`,
+    css`
       :host {
         display: none;
         position: absolute;
@@ -49,7 +46,7 @@ class Win98StartMenu extends HTMLElement {
 
       .sidebar {
         width: 25px;
-        background: linear-gradient(to top, #000080 0%, rgb(0,0, 245) 15%, #000080 30%);
+        background: linear-gradient(to top, #000080 0%, rgb(0, 0, 245) 15%, #000080 30%);
         display: flex;
         align-items: flex-end;
         padding-bottom: 5px;
@@ -65,14 +62,14 @@ class Win98StartMenu extends HTMLElement {
         white-space: nowrap;
         position: absolute;
         bottom: 5px;
-        left: 22px; /* Adjust based on width */
+        left: 22px;
         font-family: "MS Sans Serif", Arial, sans-serif;
       }
-      
+
       .sidebar-text b {
         font-weight: bold;
       }
-      
+
       .sidebar-text span {
         font-weight: normal;
       }
@@ -83,13 +80,16 @@ class Win98StartMenu extends HTMLElement {
         flex-direction: column;
         padding: 1px;
       }
+    `
+  ];
 
+  constructor() {
+    super();
+    this.visible = false;
+  }
 
-    `;
-    }
-
-    getTemplate() {
-        return `
+  render() {
+    return html`
       <div class="start-menu">
         <div class="sidebar">
           <div class="sidebar-text"><b>Windows</b><span>98</span></div>
@@ -99,18 +99,7 @@ class Win98StartMenu extends HTMLElement {
         </div>
       </div>
     `;
-    }
-
-    render() {
-        const win98Sheet = new CSSStyleSheet();
-        win98Sheet.replaceSync(win98Styles);
-
-        const componentSheet = new CSSStyleSheet();
-        componentSheet.replaceSync(Win98StartMenu.componentStyles);
-
-        this.shadowRoot.adoptedStyleSheets = [win98Sheet, componentSheet];
-        this.shadowRoot.innerHTML = this.getTemplate();
-    }
+  }
 }
 
 customElements.define('win98-start-menu', Win98StartMenu);

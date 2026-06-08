@@ -1,65 +1,21 @@
+import { LitElement, html, css, unsafeCSS } from 'lit';
 import win98Styles from '../css/98-overrides.css?inline';
 
 /**
  * Win98MenuItem - A single item within a start menu or submenu.
  * Supports icons, labels, and nested submenus.
  */
-class Win98MenuItem extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+class Win98MenuItem extends LitElement {
+  static properties = {
+    label: { type: String },
+    icon: { type: Object },
+    large: { type: Boolean, reflect: true },
+    hasSubmenu: { type: Boolean, state: true }
+  };
 
-  static get observedAttributes() {
-    return ['label', 'icon', 'has-submenu', 'large'];
-  }
-
-  connectedCallback() {
-    this.render();
-    this.setupListeners();
-    this.updateSubmenuState();
-  }
-
-  attributeChangedCallback() {
-    this.render();
-    this.updateSubmenuState();
-  }
-
-  setupListeners() {
-    this.shadowRoot.addEventListener('click', (e) => {
-      if (!this.hasSubmenu) {
-        this.dispatchEvent(new CustomEvent('menu-item-click', {
-          bubbles: true,
-          composed: true,
-          detail: { label: this.getAttribute('label') }
-        }));
-      }
-    });
-
-    const submenuSlot = this.shadowRoot.querySelector('slot[name="submenu"]');
-    if (submenuSlot) {
-      submenuSlot.addEventListener('slotchange', () => this.updateSubmenuState());
-    }
-  }
-
-  updateSubmenuState() {
-    const submenuSlot = this.shadowRoot.querySelector('slot[name="submenu"]');
-    const hasContent = submenuSlot && submenuSlot.assignedElements().length > 0;
-    this.hasSubmenu = hasContent || this.hasAttribute('has-submenu');
-
-    const arrow = this.shadowRoot.querySelector('.menu-item-arrow');
-    if (arrow) {
-      arrow.style.display = this.hasSubmenu ? 'block' : 'none';
-    }
-
-    const container = this.shadowRoot.querySelector('.submenu-container');
-    if (container) {
-      container.classList.toggle('has-items', this.hasSubmenu);
-    }
-  }
-
-  static get componentStyles() {
-    return `
+  static styles = [
+    css`${unsafeCSS(win98Styles)}`,
+    css`
       :host {
         display: block;
         position: relative;
@@ -73,13 +29,13 @@ class Win98MenuItem extends HTMLElement {
         padding: 0 4px 0 6px;
         cursor: default;
         color: black;
-        height: 22px; /* Win98 items are generally around 22-24px */
+        height: 22px;
         white-space: nowrap;
         position: relative;
       }
 
       :host([large]) .menu-item {
-        height: 38px; /* Taller for main menu */
+        height: 38px;
         padding: 0 8px;
         font-size: 12px;
       }
@@ -101,10 +57,11 @@ class Win98MenuItem extends HTMLElement {
 
       :host([large]) .menu-item-icon {
         width: 32px;
-        height:32px;
+        height: 32px;
       }
 
-      .menu-item-icon img, ::slotted([slot="icon"]) {
+      .menu-item-icon img,
+      ::slotted([slot="icon"]) {
         max-width: 100%;
         max-height: 100%;
         image-rendering: pixelated;
@@ -123,7 +80,7 @@ class Win98MenuItem extends HTMLElement {
         border-bottom: 4px solid transparent;
         border-left: 4px solid black;
         margin-left: auto;
-        display: none; /* Shown via JS if submenu exists */
+        display: ${c => c.hasSubmenu ? 'block' : 'none'};
       }
 
       :host(:hover) > .menu-item > .menu-item-arrow {
@@ -140,7 +97,7 @@ class Win98MenuItem extends HTMLElement {
         padding: 2px;
         min-width: 120px;
         z-index: 1000;
-        width: max-content; /* Fit content */
+        width: max-content;
       }
 
       :host([large]) .submenu-container {
@@ -151,52 +108,73 @@ class Win98MenuItem extends HTMLElement {
       :host(:hover) > .submenu-container.has-items {
         display: block;
       }
-    `;
+    `
+  ];
+
+  constructor() {
+    super();
+    this.label = '';
+    this.icon = null;
+    this.large = false;
+    this.hasSubmenu = false;
   }
 
-  get icon() {
-    return this._icon || this.getAttribute('icon');
+  connectedCallback() {
+    super.connectedCallback();
+    this.updateSubmenuState();
+    this.addEventListener('click', this._onClick);
   }
 
-  set icon(value) {
-    this._icon = value;
-    this.render();
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('click', this._onClick);
+  }
+
+  updated(changedProperties) {
+    super.updated(changedProperties);
+    if (changedProperties.has('label') || changedProperties.has('large')) {
+      this.requestUpdate();
+    }
+  }
+
+  _onClick = (e) => {
+    if (!this.hasSubmenu) {
+      this.dispatchEvent(new CustomEvent('menu-item-click', {
+        bubbles: true,
+        composed: true,
+        detail: { label: this.label }
+      }));
+    }
+  };
+
+  updateSubmenuState() {
+    const slot = this.renderRoot?.querySelector('slot[name="submenu"]');
+    const hasContent = slot && slot.assignedElements().length > 0;
+    this.hasSubmenu = hasContent;
   }
 
   render() {
-    const label = this.getAttribute('label') || '';
-    const isLarge = this.hasAttribute('large');
     let iconSrc = '';
-    const iconValue = this.icon;
-
-    if (typeof iconValue === 'string') {
-      iconSrc = iconValue;
-    } else if (iconValue && typeof iconValue.get === 'function') {
-      iconSrc = iconValue.get(isLarge ? 'large' : 'small');
+    if (typeof this.icon === 'string') {
+      iconSrc = this.icon;
+    } else if (this.icon && typeof this.icon.get === 'function') {
+      iconSrc = this.icon.get(this.large ? 'large' : 'small');
     }
 
-    const win98Sheet = new CSSStyleSheet();
-    win98Sheet.replaceSync(win98Styles);
-
-    const componentSheet = new CSSStyleSheet();
-    componentSheet.replaceSync(Win98MenuItem.componentStyles);
-
-    this.shadowRoot.adoptedStyleSheets = [win98Sheet, componentSheet];
-
-    this.shadowRoot.innerHTML = `
+    return html`
       <div class="menu-item" role="menuitem">
         <div class="menu-item-icon">
-          ${iconSrc ? `<img src="${iconSrc}" alt="">` : ''}
+          ${iconSrc ? html`<img src="${iconSrc}" alt="">` : ''}
           <slot name="icon"></slot>
         </div>
         <div class="menu-item-text">
-          ${label}
+          ${this.label}
           <slot></slot>
         </div>
         <div class="menu-item-arrow"></div>
       </div>
-      <div class="submenu-container" role="menu">
-        <slot name="submenu"></slot>
+      <div class="submenu-container has-items" role="menu" @slotchange="${this.updateSubmenuState}">
+        <slot name="submenu" @slotchange="${this.updateSubmenuState}"></slot>
       </div>
     `;
   }

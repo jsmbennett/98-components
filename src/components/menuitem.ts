@@ -86,7 +86,6 @@ class Win98MenuItem extends LitElement {
         border-bottom: 4px solid transparent;
         border-left: 4px solid black;
         margin-left: auto;
-        display: ${c => (c as Win98MenuItem).hasSubmenu ? 'block' : 'none'};
       }
 
       :host(:hover) > .menu-item > .menu-item-arrow {
@@ -169,9 +168,9 @@ class Win98MenuItem extends LitElement {
           ${this.label}
           <slot></slot>
         </div>
-        <div class="menu-item-arrow"></div>
+        ${this.hasSubmenu ? html`<div class="menu-item-arrow"></div>` : ''}
       </div>
-      <div class="submenu-container has-items" role="menu" @slotchange="${this.updateSubmenuState}">
+      <div class="submenu-container ${this.hasSubmenu ? 'has-items' : ''}" role="menu" @slotchange="${this.updateSubmenuState}">
         <slot name="submenu" @slotchange="${this.updateSubmenuState}"></slot>
       </div>
     `;

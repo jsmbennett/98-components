@@ -64,7 +64,6 @@ class Win98Taskbar extends LitElement {
       .start-icon {
         width: 16px;
         height: 16px;
-        background-image: url('${windowsLogo}');
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
@@ -223,7 +222,7 @@ class Win98Taskbar extends LitElement {
           <slot name="start-menu"></slot>
         </win98-start-menu>
         <button class="start-button ${this.startMenuVisible ? 'active' : ''}" @click="${this.handleStartToggle}">
-          <div class="start-icon"></div>
+          <div class="start-icon" style="background-image: url('${windowsLogo}')"></div>
           <span>Start</span>
         </button>
         <div class="task-list">

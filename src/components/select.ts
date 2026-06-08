@@ -106,7 +106,6 @@ class Win98Select extends LitElement {
       }
 
       .dropdown-list {
-        display: ${c => (c as Win98Select).isOpen ? 'block' : 'none'};
         position: absolute;
         top: 100%;
         left: 0;
@@ -117,6 +116,14 @@ class Win98Select extends LitElement {
         border: 1px solid #000;
         z-index: 1000;
         margin-top: 1px;
+      }
+
+      .dropdown-list.hidden {
+        display: none;
+      }
+
+      .dropdown-list.visible {
+        display: block;
       }
 
       .dropdown-item {
@@ -371,7 +378,7 @@ class Win98Select extends LitElement {
         </div>
       </div>
 
-      <div class="dropdown-list" role="listbox">
+      <div class="dropdown-list ${this.isOpen ? 'visible' : 'hidden'}" role="listbox">
         ${this.options.map((opt, i) => html`
           <div class="dropdown-item ${i === this.selectedIndex ? 'selected' : ''}"
                role="option"

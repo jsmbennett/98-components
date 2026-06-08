@@ -1,9 +1,9 @@
 /**
  * Main entry point for the component library demo
- * 
+ *
  * This file imports and initializes all example modules
  */
-import '../src/index.js';
+import '../src/index.ts';
 
 // Setup icons first (registers them with the iconRegistry)
 import { setupTaskbarIcons } from './setup-icons.js';

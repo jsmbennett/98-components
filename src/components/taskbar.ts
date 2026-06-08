@@ -1,25 +1,25 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
+import { property, state } from 'lit/decorators.js';
 import win98Styles from '../css/98-overrides.css?inline';
-import { windowManager } from '../services/WindowManager.js';
+import { windowManager, WindowData } from '../services/WindowManager';
 import windowsLogo from '../resources/icons/misc/windows-logo-start-16x16.png';
-import './startmenu.js';
+import './startmenu';
 
-/**
- * Win98Taskbar - The taskbar component
- *
- * Displays:
- * - Start button
- * - Task buttons for open windows
- * - System tray (optional)
- */
 class Win98Taskbar extends LitElement {
-  static properties = {
-    startMenuVisible: { type: Boolean, state: true },
-    windows: { type: Array, state: true },
-    clock: { type: String, state: true }
-  };
+  @state()
+  startMenuVisible = false;
 
-  static styles = [
+  @state()
+  windows: WindowData[] = [];
+
+  @state()
+  clock = '12:00 AM';
+
+  private clockInterval: number | null = null;
+  private boundUpdateTasks: (() => void) | null = null;
+  private boundOutsideClick: ((e: MouseEvent) => void) | null = null;
+
+  static override styles = [
     css`${unsafeCSS(win98Styles)}`,
     css`
       :host {
@@ -126,28 +126,20 @@ class Win98Taskbar extends LitElement {
     `
   ];
 
-  constructor() {
-    super();
-    this.startMenuVisible = false;
-    this.windows = [];
-    this.clock = '12:00 AM';
-    this.clockInterval = null;
-  }
-
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.setupEventListeners();
     this.updateTasks();
     this.updateClock();
-    this.clockInterval = setInterval(() => this.updateClock(), 1000);
+    this.clockInterval = window.setInterval(() => this.updateClock(), 1000);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this.cleanup();
   }
 
-  setupEventListeners() {
+  private setupEventListeners() {
     this.boundUpdateTasks = () => this.updateTasks();
 
     windowManager.addEventListener('window-registered', this.boundUpdateTasks);
@@ -157,10 +149,11 @@ class Win98Taskbar extends LitElement {
     windowManager.addEventListener('window-restored', this.boundUpdateTasks);
     windowManager.addEventListener('window-updated', this.boundUpdateTasks);
 
-    this.boundOutsideClick = (e) => {
+    this.boundOutsideClick = (e: MouseEvent) => {
       if (this.startMenuVisible) {
-        const path = e.composedPath();
-        if (!path.includes(this) && !path.includes(this.renderRoot.querySelector('win98-start-menu'))) {
+        const path = (e as any).composedPath?.() || [];
+        const startMenu = this.renderRoot.querySelector('win98-start-menu');
+        if (!path.includes(this) && !path.includes(startMenu)) {
           this.startMenuVisible = false;
         }
       }
@@ -169,26 +162,30 @@ class Win98Taskbar extends LitElement {
     window.addEventListener('mousedown', this.boundOutsideClick);
   }
 
-  cleanup() {
-    windowManager.removeEventListener('window-registered', this.boundUpdateTasks);
-    windowManager.removeEventListener('window-unregistered', this.boundUpdateTasks);
-    windowManager.removeEventListener('window-focused', this.boundUpdateTasks);
-    windowManager.removeEventListener('window-minimized', this.boundUpdateTasks);
-    windowManager.removeEventListener('window-restored', this.boundUpdateTasks);
-    windowManager.removeEventListener('window-updated', this.boundUpdateTasks);
+  private cleanup() {
+    if (this.boundUpdateTasks) {
+      windowManager.removeEventListener('window-registered', this.boundUpdateTasks);
+      windowManager.removeEventListener('window-unregistered', this.boundUpdateTasks);
+      windowManager.removeEventListener('window-focused', this.boundUpdateTasks);
+      windowManager.removeEventListener('window-minimized', this.boundUpdateTasks);
+      windowManager.removeEventListener('window-restored', this.boundUpdateTasks);
+      windowManager.removeEventListener('window-updated', this.boundUpdateTasks);
+    }
 
-    window.removeEventListener('mousedown', this.boundOutsideClick);
+    if (this.boundOutsideClick) {
+      window.removeEventListener('mousedown', this.boundOutsideClick);
+    }
 
     if (this.clockInterval) {
       clearInterval(this.clockInterval);
     }
   }
 
-  updateTasks() {
+  private updateTasks() {
     this.windows = windowManager.getAllWindows();
   }
 
-  updateClock() {
+  private updateClock() {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes().toString().padStart(2, '0');
@@ -198,7 +195,7 @@ class Win98Taskbar extends LitElement {
     this.clock = `${displayHours}:${minutes} ${ampm}`;
   }
 
-  handleStartToggle(e) {
+  private handleStartToggle(e: MouseEvent) {
     e.stopPropagation();
     this.startMenuVisible = !this.startMenuVisible;
 
@@ -209,7 +206,7 @@ class Win98Taskbar extends LitElement {
     }));
   }
 
-  handleTaskClick(window) {
+  private handleTaskClick(window: WindowData) {
     if (window.minimized) {
       windowManager.restore(window.id);
     } else if (window.active) {
@@ -219,7 +216,7 @@ class Win98Taskbar extends LitElement {
     }
   }
 
-  render() {
+  override render() {
     return html`
       <div class="taskbar">
         <win98-start-menu ?visible="${this.startMenuVisible}">

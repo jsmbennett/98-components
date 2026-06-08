@@ -1,13 +1,15 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
+import { property } from 'lit/decorators.js';
 import win98Styles from '../css/98-overrides.css?inline';
 
 class Win98Button extends LitElement {
-  static properties = {
-    default: { type: Boolean, reflect: true },
-    disabled: { type: Boolean, reflect: true }
-  };
+  @property({ type: Boolean, reflect: true })
+  default = false;
 
-  static styles = [
+  @property({ type: Boolean, reflect: true })
+  disabled = false;
+
+  static override styles = [
     css`${unsafeCSS(win98Styles)}`,
     css`
       :host {
@@ -16,13 +18,7 @@ class Win98Button extends LitElement {
     `
   ];
 
-  constructor() {
-    super();
-    this.default = false;
-    this.disabled = false;
-  }
-
-  render() {
+  override render() {
     return html`
       <button
         class="${this.default ? 'default' : ''}"
@@ -34,7 +30,7 @@ class Win98Button extends LitElement {
     `;
   }
 
-  _onClick(e) {
+  private _onClick(e: MouseEvent) {
     if (this.disabled) {
       e.preventDefault();
       e.stopPropagation();

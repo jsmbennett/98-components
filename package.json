@@ -30,6 +30,7 @@
   "devDependencies": {
     "jsdoc": "^4.0.5",
     "rimraf": "^6.1.2",
+    "typescript": "6.0.0-dev.20260416",
     "vite": "^5.0.0"
   },
   "packageManager": "pnpm@10.24.0"

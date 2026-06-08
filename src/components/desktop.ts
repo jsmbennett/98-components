@@ -1,43 +1,24 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
 import win98Styles from '98.css?inline';
-import { windowManager } from '../services/WindowManager.js';
+import { windowManager } from '../services/WindowManager';
 
-/**
- * @typedef {Object} WindowOptions
- * @property {string} [title="Window"] - The text displayed in the title bar.
- * @property {string|null} [icon=null] - The icon to display in the title bar and taskbar.
- * @property {boolean} [resizable=false] - Whether the window can be resized by the user.
- * @property {boolean} [showHelp=false] - Whether to show the help button in the title bar.
- * @property {boolean} [statusBar=false] - Whether to show a status bar at the bottom.
- * @property {boolean} [showMinimize=true] - Whether to show the minimize button.
- * @property {boolean} [showMaximize=true] - Whether to show the maximize button.
- * @property {number} [x] - Initial X coordinate in pixels.
- * @property {number} [y] - Initial Y coordinate in pixels.
- * @property {number} [width] - Initial width in pixels.
- * @property {number} [height] - Initial height in pixels.
- * @property {string|HTMLElement} [content] - The HTML string or element to place inside the window.
- */
+interface WindowOptions {
+  title?: string;
+  icon?: string | null;
+  resizable?: boolean;
+  showHelp?: boolean;
+  statusBar?: boolean;
+  showMinimize?: boolean;
+  showMaximize?: boolean;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  content?: string | HTMLElement;
+}
 
-/**
- * Win98Desktop - The root container component.
- *
- * This component acts as the "viewport" or "screen" for the Windows 98 environment.
- * It manages window placement, z-index stacking via the WindowManager, and provides
- * a taskbar area.
- *
- * @element win98-desktop
- *
- * @slot - The default slot for `<win98-window>` elements.
- * @slot taskbar - The slot for the `<win98-taskbar>` component.
- *
- * @cssprop [--desktop-background=#008080] - The background color of the desktop.
- *
- * @listens window-focus - Focuses the window when it requests focus.
- * @listens window-close - Unregisters the window when it is closed.
- * @listens window-minimize - Minimizes the window when requested.
- */
 class Win98Desktop extends LitElement {
-  static styles = [
+  static override styles = [
     css`${unsafeCSS(win98Styles)}`,
     css`
       :host {
@@ -71,19 +52,19 @@ class Win98Desktop extends LitElement {
     `
   ];
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.setupEventListeners();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this.cleanup();
   }
 
-  setupEventListeners() {
+  private setupEventListeners() {
     this.addEventListener('window-focus', (e) => {
-      const windowElement = e.target;
+      const windowElement = e.target as HTMLElement;
       const windowId = windowElement.dataset.windowId;
       if (windowId) {
         windowManager.focus(windowId);
@@ -91,7 +72,7 @@ class Win98Desktop extends LitElement {
     });
 
     this.addEventListener('window-close', (e) => {
-      const windowElement = e.target;
+      const windowElement = e.target as HTMLElement;
       const windowId = windowElement.dataset.windowId;
       if (windowId) {
         windowManager.unregister(windowId);
@@ -99,7 +80,7 @@ class Win98Desktop extends LitElement {
     });
 
     this.addEventListener('window-minimize', (e) => {
-      const windowElement = e.target;
+      const windowElement = e.target as HTMLElement;
       const windowId = windowElement.dataset.windowId;
       if (windowId) {
         windowManager.minimize(windowId);
@@ -110,7 +91,7 @@ class Win98Desktop extends LitElement {
       console.log('Window maximized:', e.target);
     });
 
-    const slot = this.renderRoot.querySelector('slot:not([name])');
+    const slot = this.renderRoot.querySelector('slot:not([name])') as HTMLSlotElement;
     if (slot) {
       slot.addEventListener('slotchange', () => {
         this.registerWindows();
@@ -120,27 +101,27 @@ class Win98Desktop extends LitElement {
     this.registerWindows();
   }
 
-  registerWindows() {
-    const slot = this.renderRoot.querySelector('slot:not([name])');
+  private registerWindows() {
+    const slot = this.renderRoot.querySelector('slot:not([name])') as HTMLSlotElement;
     if (!slot) return;
 
     const windows = slot.assignedElements().filter(el => el.tagName === 'WIN98-WINDOW');
 
     windows.forEach(windowElement => {
-      if (!windowElement.dataset.windowId) {
-        const title = windowElement.getAttribute('title') || 'Window';
-        const icon = windowElement.getAttribute('icon') || null;
+      if (!(windowElement as HTMLElement).dataset.windowId) {
+        const title = (windowElement as HTMLElement).getAttribute('title') || 'Window';
+        const icon = (windowElement as HTMLElement).getAttribute('icon') || null;
 
-        windowManager.register(windowElement, { title, icon });
+        windowManager.register(windowElement as HTMLElement, { title, icon });
       }
     });
   }
 
-  cleanup() {
+  private cleanup() {
     // Clean up event listeners if needed
   }
 
-  render() {
+  override render() {
     return html`
       <div class="desktop-container">
         <slot></slot>
@@ -151,13 +132,7 @@ class Win98Desktop extends LitElement {
     `;
   }
 
-  /**
-   * Programmatically create and add a window to the desktop.
-   *
-   * @param {WindowOptions} options - Configuration for the new window.
-   * @returns {HTMLElement} The created `<win98-window>` element.
-   */
-  createWindow(options = {}) {
+  createWindow(options: WindowOptions = {}) {
     const window = document.createElement('win98-window');
 
     if (options.title) window.setAttribute('title', options.title);
@@ -185,18 +160,10 @@ class Win98Desktop extends LitElement {
     return window;
   }
 
-  /**
-   * Get the count of all windows
-   * @returns {number} Number of windows
-   */
-  getWindowCount() {
+  getWindowCount(): number {
     return windowManager.getWindowCount();
   }
 
-  /**
-   * Get all windows
-   * @returns {Array} Array of window data objects
-   */
   getAllWindows() {
     return windowManager.getAllWindows();
   }

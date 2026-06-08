@@ -1,17 +1,31 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
+import { property, state } from 'lit/decorators.js';
 import win98Styles from '../css/98-overrides.css?inline';
+
+interface OptionData {
+  text: string;
+  value: string;
+  index: number;
+}
 
 class Win98Select extends LitElement {
   static formAssociated = true;
 
-  static properties = {
-    isOpen: { type: Boolean, state: true },
-    selectedIndex: { type: Number, state: true },
-    options: { type: Array, state: true },
-    disabled: { type: Boolean, reflect: true }
-  };
+  @state()
+  isOpen = false;
 
-  static styles = [
+  @state()
+  selectedIndex = -1;
+
+  @state()
+  options: OptionData[] = [];
+
+  @property({ type: Boolean, reflect: true })
+  disabled = false;
+
+  private internals_: ElementInternals;
+
+  static override styles = [
     css`${unsafeCSS(win98Styles)}`,
     css`
       :host {
@@ -92,7 +106,7 @@ class Win98Select extends LitElement {
       }
 
       .dropdown-list {
-        display: ${c => c.isOpen ? 'block' : 'none'};
+        display: ${c => (c as Win98Select).isOpen ? 'block' : 'none'};
         position: absolute;
         top: 100%;
         left: 0;
@@ -127,13 +141,9 @@ class Win98Select extends LitElement {
   constructor() {
     super();
     this.internals_ = this.attachInternals();
-    this.isOpen = false;
-    this.selectedIndex = -1;
-    this.options = [];
-    this.disabled = false;
   }
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.updateOptions();
 
@@ -149,7 +159,7 @@ class Win98Select extends LitElement {
     this.setAttribute('aria-expanded', 'false');
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener('click', this.handleDocumentClick);
     this.removeEventListener('keydown', this.handleKeyDown);
@@ -191,7 +201,7 @@ class Win98Select extends LitElement {
     return this.options[this.selectedIndex]?.value || '';
   }
 
-  set value(v) {
+  set value(v: string) {
     const index = this.options.findIndex(opt => opt.value === v);
     if (index !== -1) {
       this.select(index, false);
@@ -204,17 +214,17 @@ class Win98Select extends LitElement {
     }
   }
 
-  formStateRestoreCallback(state, mode) {
+  formStateRestoreCallback(state: string) {
     this.value = state;
   }
 
-  handleDocumentClick = (e) => {
-    if (!this.contains(e.target)) {
+  private handleDocumentClick = (e: MouseEvent) => {
+    if (!this.contains(e.target as Node)) {
       this.close();
     }
   };
 
-  handleKeyDown = (e) => {
+  private handleKeyDown = (e: KeyboardEvent) => {
     if (this.disabled) return;
 
     switch (e.key) {
@@ -227,7 +237,7 @@ class Win98Select extends LitElement {
           this.toggle();
         }
         break;
-            case 'Escape':
+      case 'Escape':
         if (this.isOpen) {
           e.preventDefault();
           this.close();
@@ -260,26 +270,26 @@ class Win98Select extends LitElement {
     }
   };
 
-  moveSelection(step) {
+  private moveSelection(step: number) {
     const newIndex = Math.max(0, Math.min(this.options.length - 1, this.selectedIndex + step));
     this.select(newIndex, false);
     this.scrollToOption(newIndex);
   }
 
-  scrollToOption(index) {
-    const list = this.renderRoot.querySelector('.dropdown-list');
-    const item = list.children[index];
+  private scrollToOption(index: number) {
+    const list = this.renderRoot.querySelector('.dropdown-list') as HTMLElement;
+    const item = list.children[index] as HTMLElement;
     if (item) {
       item.scrollIntoView({ block: 'nearest' });
     }
   }
 
-  updateOptions() {
-    const slot = this.renderRoot?.querySelector('slot');
-    const nodes = slot?.assignedNodes().filter(node => node.tagName === 'OPTION') || [];
+  private updateOptions() {
+    const slot = this.renderRoot?.querySelector('slot') as HTMLSlotElement;
+    const nodes = slot?.assignedNodes().filter(node => (node as Element).tagName === 'OPTION') || [];
     this.options = nodes.map((node, index) => ({
-      text: node.textContent,
-      value: node.getAttribute('value') || node.textContent,
+      text: (node as HTMLElement).textContent || '',
+      value: (node as HTMLElement).getAttribute('value') || (node as HTMLElement).textContent || '',
       index
     }));
 
@@ -288,23 +298,23 @@ class Win98Select extends LitElement {
     }
   }
 
-  toggle() {
+  private toggle() {
     if (this.disabled) return;
     this.isOpen = !this.isOpen;
-    this.setAttribute('aria-expanded', this.isOpen);
+    this.setAttribute('aria-expanded', this.isOpen.toString());
     if (this.isOpen && this.selectedIndex !== -1) {
       setTimeout(() => this.scrollToOption(this.selectedIndex), 0);
     }
   }
 
-  close() {
+  private close() {
     if (this.isOpen) {
       this.isOpen = false;
       this.setAttribute('aria-expanded', 'false');
     }
   }
 
-  select(index, close = true) {
+  private select(index: number, close = true) {
     if (index < 0 || index >= this.options.length) return;
 
     this.selectedIndex = index;
@@ -323,30 +333,31 @@ class Win98Select extends LitElement {
     }
   }
 
-  updated(changedProperties) {
+  override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
 
     if (changedProperties.has('isOpen')) {
-      const selectBox = this.renderRoot.querySelector('.select-box');
+      const selectBox = this.renderRoot.querySelector('.select-box') as HTMLElement;
       if (selectBox) {
         selectBox.addEventListener('click', () => this.toggle());
       }
 
-      this.renderRoot.querySelectorAll('.dropdown-item').forEach(item => {
+      const items = this.renderRoot.querySelectorAll('.dropdown-item') as NodeListOf<HTMLElement>;
+      items.forEach(item => {
         item.addEventListener('mouseenter', () => {
-          this.renderRoot.querySelectorAll('.dropdown-item').forEach(el => el.classList.remove('selected'));
+          items.forEach(el => el.classList.remove('selected'));
           item.classList.add('selected');
         });
 
         item.addEventListener('click', (e) => {
           e.stopPropagation();
-          this.select(parseInt(item.dataset.index));
+          this.select(parseInt((item as HTMLElement).dataset.index || '0'));
         });
       });
     }
   }
 
-  render() {
+  override render() {
     const selectedOption = this.options[this.selectedIndex];
     const displayText = selectedOption ? selectedOption.text : '';
 

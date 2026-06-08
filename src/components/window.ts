@@ -1,37 +1,72 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
+import { property } from 'lit/decorators.js';
 import win98Styles from '../css/98-overrides.css?inline';
-import { windowManager } from '../services/WindowManager.js';
+import { windowManager } from '../services/WindowManager';
+
+interface ResizeConfig {
+  cursor: string;
+  x: -1 | 0 | 1;
+  y: -1 | 0 | 1;
+}
+
+interface ResizeResult {
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+}
+
+interface InteractionConfig {
+  onMove: (me: MouseEvent, ghost: HTMLElement, initialRect: DOMRect) => void;
+  onEnd: (ue: MouseEvent, ghost: HTMLElement, initialRect: DOMRect) => void;
+  cursorClass?: string;
+}
 
 class Win98Window extends LitElement {
-  static properties = {
-    title: { type: String },
-    resizable: { type: Boolean, reflect: true },
-    inactive: { type: Boolean, reflect: true },
-    showHelp: { type: Boolean, attribute: 'show-help', reflect: true },
-    statusBar: { type: Boolean, attribute: 'status-bar', reflect: true },
-    showMinimize: {
-      type: Boolean,
-      attribute: 'show-minimize',
-      reflect: true,
-      converter: {
-        fromAttribute: (value) => value !== 'false',
-        toAttribute: (value) => value ? '' : null
-      }
-    },
-    showMaximize: {
-      type: Boolean,
-      attribute: 'show-maximize',
-      reflect: true,
-      converter: {
-        fromAttribute: (value) => value !== 'false',
-        toAttribute: (value) => value ? '' : null
-      }
-    },
-    noDrag: { type: Boolean, attribute: 'no-drag', reflect: true },
-    icon: { type: String }
-  };
+  @property({ type: String })
+  title = 'Window';
 
-  static styles = [
+  @property({ type: Boolean, reflect: true })
+  resizable = false;
+
+  @property({ type: Boolean, reflect: true })
+  inactive = false;
+
+  @property({ type: Boolean, attribute: 'show-help', reflect: true })
+  showHelp = false;
+
+  @property({ type: Boolean, attribute: 'status-bar', reflect: true })
+  statusBar = false;
+
+  @property({
+    type: Boolean,
+    attribute: 'show-minimize',
+    reflect: true,
+    converter: {
+      fromAttribute: (value) => value !== 'false',
+      toAttribute: (value) => value ? '' : null
+    }
+  })
+  showMinimize = true;
+
+  @property({
+    type: Boolean,
+    attribute: 'show-maximize',
+    reflect: true,
+    converter: {
+      fromAttribute: (value) => value !== 'false',
+      toAttribute: (value) => value ? '' : null
+    }
+  })
+  showMaximize = true;
+
+  @property({ type: Boolean, attribute: 'no-drag', reflect: true })
+  noDrag = false;
+
+  @property({ type: String })
+  icon: string | null = null;
+
+  static override styles = [
     css`${unsafeCSS(win98Styles)}`,
     css`
       :host {
@@ -51,17 +86,17 @@ class Win98Window extends LitElement {
       /* Attribute-driven visibility */
       :host(:not([status-bar])) .status-bar { display: none; }
       :host(:not([resizable])) .resize-handle { display: none; }
-      
+
       /* Logic for which buttons to show */
       :host([show-help]) [data-window-action="minimize"],
       :host([show-help]) [data-window-action="maximize"] { display: none; }
-      
+
       :host(:not([show-minimize])) [data-window-action="minimize"],
       :host([show-minimize="false"]) [data-window-action="minimize"] { display: none; }
-      
+
       :host(:not([show-maximize])) [data-window-action="maximize"],
       :host([show-maximize="false"]) [data-window-action="maximize"] { display: none; }
-      
+
       :host(:not([show-help])) [data-window-action="help"] { display: none; }
 
       .resize-handle {
@@ -79,28 +114,14 @@ class Win98Window extends LitElement {
     `
   ];
 
-  constructor() {
-    super();
-    this.title = 'Window';
-    this.resizable = false;
-    this.inactive = false;
-    this.showHelp = false;
-    this.statusBar = false;
-    this.showMinimize = true;
-    this.showMaximize = true;
-    this.noDrag = false;
-    this.icon = null;
-  }
-
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
-    // Register with windowManager if not already registered
     if (!this.dataset.windowId) {
       windowManager.register(this, { title: this.title, icon: this.icon });
     }
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     const windowId = this.dataset.windowId;
     if (windowId) {
@@ -108,14 +129,14 @@ class Win98Window extends LitElement {
     }
   }
 
-  updated(changedProperties) {
+  override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('title') && this.dataset.windowId) {
       windowManager.updateWindow(this.dataset.windowId, { title: this.title });
     }
   }
 
-  render() {
+  override render() {
     return html`
       <div class="window" data-window-part="root" @mousedown="${this._onMouseDown}">
         <div class="title-bar ${this.inactive ? 'inactive' : ''}" data-window-action="drag">
@@ -133,7 +154,7 @@ class Win98Window extends LitElement {
         <div class="status-bar">
           <slot name="status"></slot>
         </div>
-        
+
         <!-- Drag/Resize targets -->
         <div class="resize-handle resize-handle-nw" data-resize="nw"></div>
         <div class="resize-handle resize-handle-n" data-resize="n"></div>
@@ -147,25 +168,24 @@ class Win98Window extends LitElement {
     `;
   }
 
-  _onMouseDown(e) {
-    // Focus window
+  private _onMouseDown = (e: MouseEvent) => {
     this.dispatchEvent(new CustomEvent('window-focus', { bubbles: true, composed: true }));
 
-    const actionEl = e.target.closest('[data-window-action]');
-    const action = actionEl?.dataset.windowAction;
+    const actionEl = (e.target as HTMLElement).closest('[data-window-action]');
+    const action = actionEl?.getAttribute('data-window-action');
 
-    if (e.target.dataset.resize && this.resizable) {
+    if ((e.target as HTMLElement).dataset.resize && this.resizable) {
       this._handleResizeStart(e);
       return;
     }
 
     if (action) {
-      if (e.target.tagName === 'BUTTON' && action === 'drag') return;
+      if ((e.target as HTMLElement).tagName === 'BUTTON' && action === 'drag') return;
       this._handleAction(action, e);
     }
-  }
+  };
 
-  _handleAction(action, e) {
+  private _handleAction(action: string, e: MouseEvent) {
     switch (action) {
       case 'minimize':
         this.dispatchEvent(new CustomEvent('window-minimize', { bubbles: true, composed: true }));
@@ -186,7 +206,7 @@ class Win98Window extends LitElement {
     }
   }
 
-  _handleMaximize() {
+  private _handleMaximize() {
     this.dispatchEvent(new CustomEvent('window-maximize', { bubbles: true, composed: true }));
     const isMaximized = this.style.width === '100%' && this.style.height === '100%';
 
@@ -206,8 +226,8 @@ class Win98Window extends LitElement {
     this.dispatchEvent(new CustomEvent('window-resize', { bubbles: true, composed: true }));
   }
 
-  _handleDrag(e) {
-    if (this.noDrag || e.target.tagName === 'BUTTON') return;
+  private _handleDrag(e: MouseEvent) {
+    if (this.noDrag || (e.target as HTMLElement).tagName === 'BUTTON') return;
     e.preventDefault();
 
     const rect = this.getBoundingClientRect();
@@ -228,9 +248,10 @@ class Win98Window extends LitElement {
     });
   }
 
-  _handleResizeStart(e) {
-    const dir = e.target.dataset.resize;
-    const configs = {
+  private _handleResizeStart(e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    const dir = target.dataset.resize as string;
+    const configs: Record<string, ResizeConfig> = {
       nw: { cursor: 'cursor-drag-nwse', x: -1, y: -1 },
       n: { cursor: 'cursor-drag-ns', x: 0, y: -1 },
       ne: { cursor: 'cursor-drag-nesw', x: 1, y: -1 },
@@ -248,24 +269,24 @@ class Win98Window extends LitElement {
     this._startInteraction(e, {
       cursorClass: config.cursor,
       onMove: (me, ghost, initialRect) => {
-        const res = this._calculateResize(me.clientX - e.clientX, me.clientY - e.clientY, initialRect, config);
+        const res = this._calculateResize(me.clientX - (e as MouseEvent).clientX, me.clientY - (e as MouseEvent).clientY, initialRect, config);
         Object.assign(ghost.style, { width: `${res.width}px`, height: `${res.height}px`, left: `${res.left}px`, top: `${res.top}px` });
       },
       onEnd: (ue, ghost, initialRect) => {
-        const res = this._calculateResize(ue.clientX - e.clientX, ue.clientY - e.clientY, initialRect, config);
+        const res = this._calculateResize(ue.clientX - (e as MouseEvent).clientX, ue.clientY - (e as MouseEvent).clientY, initialRect, config);
         Object.assign(this.style, { width: `${res.width}px`, height: `${res.height}px`, left: `${res.left}px`, top: `${res.top}px` });
         this.dispatchEvent(new CustomEvent('window-resize', { bubbles: true, composed: true }));
       }
     });
   }
 
-  _startInteraction(e, { onMove, onEnd, cursorClass }) {
+  private _startInteraction(e: MouseEvent, { onMove, onEnd, cursorClass }: InteractionConfig) {
     const rect = this.getBoundingClientRect();
     const ghost = this._createGhost(rect);
     const overlay = this._createOverlay(cursorClass);
 
-    const mouseMove = (me) => onMove(me, ghost, rect);
-    const mouseUp = (ue) => {
+    const mouseMove = (me: MouseEvent) => onMove(me, ghost, rect);
+    const mouseUp = (ue: MouseEvent) => {
       document.removeEventListener('mousemove', mouseMove);
       document.removeEventListener('mouseup', mouseUp);
       onEnd(ue, ghost, rect);
@@ -277,7 +298,7 @@ class Win98Window extends LitElement {
     document.addEventListener('mouseup', mouseUp);
   }
 
-  _createGhost(rect) {
+  private _createGhost(rect: DOMRect) {
     const ghost = document.createElement('div');
     ghost.style.cssText = `
       position: fixed; width: ${rect.width}px; height: ${rect.height}px;
@@ -289,7 +310,7 @@ class Win98Window extends LitElement {
     return ghost;
   }
 
-  _createOverlay(cursorClass) {
+  private _createOverlay(cursorClass?: string) {
     if (!cursorClass) return null;
     const overlay = document.createElement('div');
     overlay.className = cursorClass;
@@ -298,7 +319,7 @@ class Win98Window extends LitElement {
     return overlay;
   }
 
-  _calculateResize(deltaX, deltaY, start, config) {
+  private _calculateResize(deltaX: number, deltaY: number, start: DOMRect, config: ResizeConfig): ResizeResult {
     const min = 100;
     let w = start.width, h = start.height, l = start.left, t = start.top;
 
@@ -313,4 +334,5 @@ class Win98Window extends LitElement {
 }
 
 customElements.define('win98-window', Win98Window);
+
 export default Win98Window;

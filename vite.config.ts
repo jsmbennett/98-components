@@ -1,11 +1,10 @@
-/** @type {import('vite').UserConfig} */
 import { defineConfig } from "vite";
 import { resolve } from "path";
 
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.js"),
+      entry: resolve(__dirname, "src/index.ts"),
       name: "98-components",
       fileName: (format, entryName) => `98comp-${entryName}.${format}.js`,
       cssFileName: "98comp",

@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 
 class Win98MenuSeparator extends LitElement {
-  static styles = css`
+  static override styles = css`
     :host {
       display: block;
       height: 2px;
@@ -11,10 +11,11 @@ class Win98MenuSeparator extends LitElement {
     }
   `;
 
-  render() {
+  override render() {
     return html``;
   }
 }
 
 customElements.define('win98-menu-separator', Win98MenuSeparator);
+
 export default Win98MenuSeparator;

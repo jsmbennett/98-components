@@ -1,12 +1,12 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
+import { property } from 'lit/decorators.js';
 import win98Styles from '../css/98-overrides.css?inline';
 
 class Win98StartMenu extends LitElement {
-  static properties = {
-    visible: { type: Boolean, reflect: true }
-  };
+  @property({ type: Boolean, reflect: true })
+  visible = false;
 
-  static styles = [
+  static override styles = [
     css`${unsafeCSS(win98Styles)}`,
     css`
       :host {
@@ -83,12 +83,7 @@ class Win98StartMenu extends LitElement {
     `
   ];
 
-  constructor() {
-    super();
-    this.visible = false;
-  }
-
-  render() {
+  override render() {
     return html`
       <div class="start-menu">
         <div class="sidebar">

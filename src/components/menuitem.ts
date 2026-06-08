@@ -1,19 +1,25 @@
 import { LitElement, html, css, unsafeCSS } from 'lit';
+import { property, state } from 'lit/decorators.js';
 import win98Styles from '../css/98-overrides.css?inline';
 
-/**
- * Win98MenuItem - A single item within a start menu or submenu.
- * Supports icons, labels, and nested submenus.
- */
-class Win98MenuItem extends LitElement {
-  static properties = {
-    label: { type: String },
-    icon: { type: Object },
-    large: { type: Boolean, reflect: true },
-    hasSubmenu: { type: Boolean, state: true }
-  };
+interface IconSource {
+  get(size: 'small' | 'large'): string;
+}
 
-  static styles = [
+class Win98MenuItem extends LitElement {
+  @property({ type: String })
+  label = '';
+
+  @property({ type: Object })
+  icon: string | IconSource | null = null;
+
+  @property({ type: Boolean, reflect: true })
+  large = false;
+
+  @state()
+  hasSubmenu = false;
+
+  static override styles = [
     css`${unsafeCSS(win98Styles)}`,
     css`
       :host {
@@ -80,7 +86,7 @@ class Win98MenuItem extends LitElement {
         border-bottom: 4px solid transparent;
         border-left: 4px solid black;
         margin-left: auto;
-        display: ${c => c.hasSubmenu ? 'block' : 'none'};
+        display: ${c => (c as Win98MenuItem).hasSubmenu ? 'block' : 'none'};
       }
 
       :host(:hover) > .menu-item > .menu-item-arrow {
@@ -111,33 +117,25 @@ class Win98MenuItem extends LitElement {
     `
   ];
 
-  constructor() {
-    super();
-    this.label = '';
-    this.icon = null;
-    this.large = false;
-    this.hasSubmenu = false;
-  }
-
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     this.updateSubmenuState();
     this.addEventListener('click', this._onClick);
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListener('click', this._onClick);
   }
 
-  updated(changedProperties) {
+  override updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has('label') || changedProperties.has('large')) {
       this.requestUpdate();
     }
   }
 
-  _onClick = (e) => {
+  private _onClick = (e: MouseEvent) => {
     if (!this.hasSubmenu) {
       this.dispatchEvent(new CustomEvent('menu-item-click', {
         bubbles: true,
@@ -147,18 +145,18 @@ class Win98MenuItem extends LitElement {
     }
   };
 
-  updateSubmenuState() {
-    const slot = this.renderRoot?.querySelector('slot[name="submenu"]');
+  private updateSubmenuState() {
+    const slot = this.renderRoot?.querySelector('slot[name="submenu"]') as HTMLSlotElement;
     const hasContent = slot && slot.assignedElements().length > 0;
     this.hasSubmenu = hasContent;
   }
 
-  render() {
+  override render() {
     let iconSrc = '';
     if (typeof this.icon === 'string') {
       iconSrc = this.icon;
-    } else if (this.icon && typeof this.icon.get === 'function') {
-      iconSrc = this.icon.get(this.large ? 'large' : 'small');
+    } else if (this.icon && typeof (this.icon as IconSource).get === 'function') {
+      iconSrc = (this.icon as IconSource).get(this.large ? 'large' : 'small');
     }
 
     return html`
@@ -181,4 +179,5 @@ class Win98MenuItem extends LitElement {
 }
 
 customElements.define('win98-menu-item', Win98MenuItem);
+
 export default Win98MenuItem;

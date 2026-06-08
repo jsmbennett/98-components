@@ -208,19 +208,27 @@ class Win98Window extends LitElement {
 
   private _handleMaximize() {
     this.dispatchEvent(new CustomEvent('window-maximize', { bubbles: true, composed: true }));
-    const isMaximized = this.style.width === '100%' && this.style.height === '100%';
-
-    if (isMaximized) {
-      this.style.width = this.dataset.prevWidth || '';
-      this.style.height = this.dataset.prevHeight || '';
-      this.style.top = this.dataset.prevTop || '';
-      this.style.left = this.dataset.prevLeft || '';
+    
+    // Use WindowManager for animated maximize/restore
+    const windowId = this.dataset.windowId;
+    if (windowId) {
+      windowManager.maximize(windowId);
     } else {
-      this.dataset.prevWidth = this.style.width;
-      this.dataset.prevHeight = this.style.height;
-      this.dataset.prevTop = this.style.top;
-      this.dataset.prevLeft = this.style.left;
-      Object.assign(this.style, { width: '100%', height: '100%', top: '0', left: '0' });
+      // Fallback for windows not registered with WindowManager
+      const isMaximized = this.style.width === '100%' && this.style.height === '100%';
+
+      if (isMaximized) {
+        this.style.width = this.dataset.prevWidth || '';
+        this.style.height = this.dataset.prevHeight || '';
+        this.style.top = this.dataset.prevTop || '';
+        this.style.left = this.dataset.prevLeft || '';
+      } else {
+        this.dataset.prevWidth = this.style.width;
+        this.dataset.prevHeight = this.style.height;
+        this.dataset.prevTop = this.style.top;
+        this.dataset.prevLeft = this.style.left;
+        Object.assign(this.style, { width: '100%', height: '100%', top: '0', left: '0' });
+      }
     }
 
     this.dispatchEvent(new CustomEvent('window-resize', { bubbles: true, composed: true }));

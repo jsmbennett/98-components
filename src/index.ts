@@ -9,5 +9,9 @@ export { default as Win98Taskbar } from "./components/taskbar";
 export { default as Win98StartMenu } from "./components/startmenu";
 export { default as Win98MenuItem } from "./components/menuitem";
 export { default as Win98MenuSeparator } from "./components/menuseparator";
+export { default as Win98ContextMenu } from "./components/contextmenu";
 
 export { windowManager } from "./services/WindowManager";
+export { iconRegistry } from "./services/IconRegistry";
+
+export { default as Icon } from "./Icon";

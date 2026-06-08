@@ -15,6 +15,59 @@
     font-style: normal;
 }
 
+/* Win98 CSS Custom Properties */
+:root, :host {
+    /* Core Colors */
+    --win98-surface: #c0c0c0;
+    --win98-window: #fff;
+    --win98-text: #000;
+    --win98-highlight: #000080;
+    --win98-highlight-text: #fff;
+    
+    /* 3D Border Colors */
+    --win98-button-highlight: #fff;
+    --win98-button-light: #dfdfdf;
+    --win98-button-shadow: #808080;
+    --win98-button-dark-shadow: #0a0a0a;
+    
+    /* Title Bar Gradient */
+    --win98-title-bar-active-start: navy;
+    --win98-title-bar-active-end: #1084d0;
+    --win98-title-bar-inactive-start: grey;
+    --win98-title-bar-inactive-end: #b5b5b5;
+    
+    /* Fonts */
+    --win98-font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    --win98-font-size: 11px;
+    --win98-fixed-font-family: 'FixederSys1x', monospace;
+    
+    /* Box Shadows - Raised (button/window) */
+    --win98-shadow-raised: inset -1px -1px var(--win98-button-dark-shadow),
+                           inset 1px 1px var(--win98-button-highlight),
+                           inset -2px -2px var(--win98-button-shadow),
+                           inset 2px 2px var(--win98-button-light);
+    
+    /* Box Shadows - Pressed */
+    --win98-shadow-pressed: inset -1px -1px var(--win98-button-highlight),
+                            inset 1px 1px var(--win98-button-dark-shadow),
+                            inset -2px -2px var(--win98-button-light),
+                            inset 2px 2px var(--win98-button-shadow);
+    
+    /* Box Shadows - Sunken (input fields) */
+    --win98-shadow-sunken: inset -1px -1px var(--win98-button-highlight),
+                           inset 1px 1px var(--win98-button-shadow),
+                           inset -2px -2px var(--win98-button-light),
+                           inset 2px 2px var(--win98-button-dark-shadow);
+    
+    /* Box Shadows - Status bar/field */
+    --win98-shadow-status: inset -1px -1px var(--win98-button-light),
+                           inset 1px 1px var(--win98-button-shadow);
+    
+    /* Sizing */
+    --win98-taskbar-height: 28px;
+    --win98-title-bar-height: 18px;
+}
+
 html {
     font-smooth: never !important;
     user-select: none !important;
@@ -58,7 +111,7 @@ win98-menu-item:hover {
 
 .resize-handle-w,
 .resize-handle-e {
-    cursor: url('../resources/cursors/resize-lr.png') 2 2, ew-resize !important;
+    cursor: url('../resources/cursors/resize-lr.png') 10 10, ew-resize !important;
 }
 
 /* Cursor Utilities */
@@ -83,28 +136,28 @@ win98-menu-item:hover {
 }
 
 ::selection {
-    background-color: #000080;
-    color: #fff
+    background-color: var(--win98-highlight);
+    color: var(--win98-highlight-text);
 }
 
 body {
-    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
+    font-family: var(--win98-font-family);
     font-size: 1px;
     margin: 0;
     padding: 0;
 }
 
 textarea {
-    font-family: 'FixederSys1x', monospace;
+    font-family: var(--win98-fixed-font-family);
     font-size: 16px;
     user-select: text !important;
 }
 
 option {
-    font-family: "Pixelated MS Sans Serif", Arial, sans-serif;
-    font-size: 11px;
-    background-color: #fff;
-    color: #000;
+    font-family: var(--win98-font-family);
+    font-size: var(--win98-font-size);
+    background-color: var(--win98-window);
+    color: var(--win98-text);
 }
 
 .window-body {
@@ -113,7 +166,7 @@ option {
 
 .separator {
     height: 1px;
-    background: white;
-    border-top: 1px solid gray;
+    background: var(--win98-button-highlight);
+    border-top: 1px solid var(--win98-button-shadow);
     margin: 3px 1px;
 }

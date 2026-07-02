@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 
 const ICON_SOURCE_DIR = path.join(__dirname, '../src/resources/icons');
 const ICON_DEST_DIR = path.join(__dirname, '../src/gen/icons');
-const BASE_ICON_RELATIVE_PATH = '../../Icon.js';
+const BASE_ICON_RELATIVE_PATH = '../../Icon.ts';
 
 // Ensure destination directory exists
 if (!fs.existsSync(ICON_DEST_DIR)) {
@@ -76,7 +76,7 @@ function buildIcons() {
 
     iconsMap.forEach((paths, baseName) => {
         const camelCaseName = toCamelCase(baseName);
-        const filePath = path.join(ICON_DEST_DIR, `${camelCaseName}.js`);
+        const filePath = path.join(ICON_DEST_DIR, `${camelCaseName}.ts`);
 
         // Convert paths to use forward slashes for cross-platform imports
         const smallPath = paths.small ? paths.small.replace(/\\/g, '/') : null;
@@ -103,7 +103,7 @@ function cleanIcons() {
     if (fs.existsSync(ICON_DEST_DIR)) {
         const files = fs.readdirSync(ICON_DEST_DIR);
         files.forEach(file => {
-            if (file.endsWith('.js')) {
+            if (file.endsWith('.ts') || file.endsWith('.js')) {
                 fs.unlinkSync(path.join(ICON_DEST_DIR, file));
             }
         });

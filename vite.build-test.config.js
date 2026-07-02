@@ -10,7 +10,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            '98-components': resolve(__dirname, 'src/index.js'),
+            '98-components': resolve(__dirname, 'src/index.ts'),
         },
     },
 });
